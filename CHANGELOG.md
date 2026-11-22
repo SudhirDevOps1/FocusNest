@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.0-alpha.1](https://github.com/SudhirDevOps1/FocusNest/compare/v0.1.0-alpha.1...v0.2.0-alpha.1) (2026-11-22)
+
+
+### Features
+
+* complete FocusNest improvement, design system & Android 11 compatibility ([#17](https://github.com/SudhirDevOps1/FocusNest/issues/17)) ([fec9436](https://github.com/SudhirDevOps1/FocusNest/commit/fec943672a03b23f36e5db27b83ea5d55bb83d16))
+* purge aistudio clutter, implement version.json engine & modernize website UI with photorealistic Android mockups ([bdd43f3](https://github.com/SudhirDevOps1/FocusNest/commit/bdd43f3c5e62ebebbb6cd232484ac540f4195308))
+* scaffold FocusNest application ([d657cd4](https://github.com/SudhirDevOps1/FocusNest/commit/d657cd452a6cd0372cf144b0722a57017f4a0091))
+* setup enterprise release-please, 3D animations & premium README ([3af052f](https://github.com/SudhirDevOps1/FocusNest/commit/3af052f242f6ec1d98ad9790b1b52d5644f8e66e))
+* upgrade KSP to 2.3.6, add dynamic README metrics badges & reset release system to v0.1.0-alpha.1 ([#18](https://github.com/SudhirDevOps1/FocusNest/issues/18)) ([a2816e9](https://github.com/SudhirDevOps1/FocusNest/commit/a2816e9a764c1b55a791f659f4b5d82a60dc278c))
+
+
+### Bug Fixes
+
+* **ci:** point Robolectric dependency resolver to Maven Central via gradle.properties ([95fdec2](https://github.com/SudhirDevOps1/FocusNest/commit/95fdec2f0cc5cca8f28ced8b3170cedfa5511064))
+* **gradle:** enforce java.awt.headless=true to eliminate AWT-EventQueue-0 KSP NullPointerException ([f1f81dc](https://github.com/SudhirDevOps1/FocusNest/commit/f1f81dc4df656a5a2d7dd63c0ba5504a203addce))
+* production hardening, 27-section showcase & docs ([#12](https://github.com/SudhirDevOps1/FocusNest/issues/12)) ([620c39f](https://github.com/SudhirDevOps1/FocusNest/commit/620c39fd63e02506f82dc3bca4cfd4e9a6bde866))
+* **test:** configure Robolectric Maven Central repo url to prevent HTTP artifact fetch timeout ([5f75ccc](https://github.com/SudhirDevOps1/FocusNest/commit/5f75ccca694b8f91938bfa30f7cbe93c62ecb6c7))
+
 ## [1.3.0](https://github.com/SudhirDevOps1/FocusNest/compare/v1.2.0...v1.3.0) (2026-11-22)
 
 
