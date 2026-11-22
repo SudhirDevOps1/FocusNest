@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/SudhirDevOps1/FocusNest/compare/v1.2.0...v1.3.0) (2026-11-22)
+
+
+### Features
+
+* scaffold FocusNest application ([d657cd4](https://github.com/SudhirDevOps1/FocusNest/commit/d657cd452a6cd0372cf144b0722a57017f4a0091))
+* setup enterprise release-please, 3D animations & premium README ([3af052f](https://github.com/SudhirDevOps1/FocusNest/commit/3af052f242f6ec1d98ad9790b1b52d5644f8e66e))
+
+
+### Bug Fixes
+
+* **gradle:** enforce java.awt.headless=true to eliminate AWT-EventQueue-0 KSP NullPointerException ([f1f81dc](https://github.com/SudhirDevOps1/FocusNest/commit/f1f81dc4df656a5a2d7dd63c0ba5504a203addce))
+* production hardening, 27-section showcase & docs ([#12](https://github.com/SudhirDevOps1/FocusNest/issues/12)) ([620c39f](https://github.com/SudhirDevOps1/FocusNest/commit/620c39fd63e02506f82dc3bca4cfd4e9a6bde866))
+
 ## [1.2.0] - 2026-11-22
 - **Adaptive Foldable & Tablet Two-Pane Layouts**: Added `AdaptiveTwoPane` responsive layouts across Home Dashboard, Focus Sanctuary, Blocker (`Apps & Limits`), Insights & Reports, and Habits plus a canonical List-Detail two-pane controller on More & Settings (`720.dp+`).
 - **Offline Ambient Focus Soundscapes**: Added pure-Kotlin synthesized `AmbientSoundEngine` (`Brown Noise`, `Soft Rain`, `Warm Drone`, `Study Wash`) wired to `FocusTimerService` and `FocusScreen` with volume control and zero network permissions or bundled MP3 bloat.
