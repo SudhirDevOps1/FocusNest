@@ -22,11 +22,15 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <!-- Play-compliant launcher app discovery instead of broad QUERY_ALL_PACKAGES -->
+    <!-- Play-compliant launcher & default home discovery instead of broad QUERY_ALL_PACKAGES -->
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
         </intent>
     </queries>
 
@@ -89,7 +93,11 @@
         <service
             android:name=".service.FocusNestVpnService"
             android:exported="true"
+            android:foregroundServiceType="specialUse"
             android:permission="android.permission.BIND_VPN_SERVICE">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Local on-device DNS domain filter" />
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>

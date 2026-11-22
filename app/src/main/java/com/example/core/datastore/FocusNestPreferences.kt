@@ -24,6 +24,9 @@ private val Context.focusNestDataStore: DataStore<Preferences> by
 
 data class FocusNestSettings(
   val onboardingCompleted: Boolean = false,
+  val onboardingVersion: Int = 0,
+  val onboardingCompletedEpochMs: Long = 0L,
+  val showSystemAppsInStats: Boolean = false,
   val themeMode: ThemeMode = ThemeMode.SYSTEM,
   val accentPalette: AccentPalette = AccentPalette.EMERALD_SAGE,
   val dynamicColorEnabled: Boolean = false,
@@ -80,8 +83,32 @@ data class PersistedTimerState(
 )
 
 class FocusNestPreferences(private val context: Context) {
+  companion object {
+    const val CURRENT_ONBOARDING_VERSION = 2
+
+    fun resolveStartupPhase(
+      isLoaded: Boolean,
+      settings: FocusNestSettings,
+      readError: Boolean = false,
+    ): com.example.domain.model.StartupPhase {
+      if (readError) return com.example.domain.model.StartupPhase.RECOVERY
+      if (!isLoaded) return com.example.domain.model.StartupPhase.INITIALIZING
+      if (!settings.onboardingCompleted) {
+        return if (settings.onboardingVersion == 0 && settings.onboardingCompletedEpochMs == 0L) {
+          com.example.domain.model.StartupPhase.FIRST_RUN
+        } else {
+          com.example.domain.model.StartupPhase.ONBOARDING
+        }
+      }
+      return com.example.domain.model.StartupPhase.READY
+    }
+  }
+
   private object Keys {
     val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+    val ONBOARDING_VERSION = intPreferencesKey("onboarding_version")
+    val ONBOARDING_COMPLETED_AT = longPreferencesKey("onboarding_completed_epoch_ms")
+    val SHOW_SYSTEM_APPS = booleanPreferencesKey("show_system_apps_in_stats")
     val THEME_MODE = stringPreferencesKey("theme_mode")
     val ACCENT_PALETTE = stringPreferencesKey("accent_palette")
     val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
@@ -140,69 +167,77 @@ class FocusNestPreferences(private val context: Context) {
   }
 
   val settingsFlow: Flow<FocusNestSettings> =
-    context.focusNestDataStore.data.map { prefs ->
-      FocusNestSettings(
-        onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: false,
-        themeMode =
-          runCatching { ThemeMode.valueOf(prefs[Keys.THEME_MODE] ?: "SYSTEM") }
-            .getOrDefault(ThemeMode.SYSTEM),
-        accentPalette =
-          runCatching { AccentPalette.valueOf(prefs[Keys.ACCENT_PALETTE] ?: "EMERALD_SAGE") }
-            .getOrDefault(AccentPalette.EMERALD_SAGE),
-        dynamicColorEnabled = prefs[Keys.DYNAMIC_COLOR] ?: false,
-        languageCode = prefs[Keys.LANGUAGE_CODE] ?: "en",
-        dailyIntention = prefs[Keys.DAILY_INTENTION] ?: "",
-        quickBlockerEnabled = prefs[Keys.QUICK_BLOCKER_ENABLED] ?: false,
-        pomodoroFocusMinutes = prefs[Keys.POMO_FOCUS_MIN] ?: 25,
-        pomodoroShortBreakMinutes = prefs[Keys.POMO_SHORT_BREAK_MIN] ?: 5,
-        pomodoroLongBreakMinutes = prefs[Keys.POMO_LONG_BREAK_MIN] ?: 15,
-        pomodoroLongBreakInterval = prefs[Keys.POMO_LONG_BREAK_INTERVAL] ?: 4,
-        pomodoroTargetCycles = prefs[Keys.POMO_TARGET_CYCLES] ?: 4,
-        autoStartNextSession = prefs[Keys.AUTO_START_NEXT] ?: false,
-        soundEnabled = prefs[Keys.SOUND_ENABLED] ?: true,
-        vibrationEnabled = prefs[Keys.VIBRATION_ENABLED] ?: true,
-        invincibleModeEnabled = prefs[Keys.INVINCIBLE_ENABLED] ?: false,
-        invincibleDelayMinutes = prefs[Keys.INVINCIBLE_DELAY_MIN] ?: 15,
-        invincibleBiometricRequired = prefs[Keys.INVINCIBLE_BIOMETRIC] ?: false,
-        invinciblePendingUnlockAtEpochMs = prefs[Keys.INVINCIBLE_PENDING_UNLOCK] ?: 0L,
-        emergencyPasscodeHash = prefs[Keys.EMERGENCY_PASSCODE_HASH] ?: "",
-        bedtimeEnabled = prefs[Keys.BEDTIME_ENABLED] ?: false,
-        bedtimeStartMinute = prefs[Keys.BEDTIME_START] ?: (22 * 60 + 30),
-        bedtimeEndMinute = prefs[Keys.BEDTIME_END] ?: (7 * 60),
-        bedtimeDndEnabled = prefs[Keys.BEDTIME_DND] ?: false,
-        breakReminderEnabled = prefs[Keys.BREAK_REMINDER_ENABLED] ?: false,
-        breakReminderIntervalMinutes = prefs[Keys.BREAK_REMINDER_MIN] ?: 45,
-        vpnBlockingEnabled = prefs[Keys.VPN_BLOCKING_ENABLED] ?: false,
-        blockedNetworkPackages =
-          (prefs[Keys.BLOCKED_NETWORK_PACKAGES] ?: "")
-            .split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .toSet(),
-        reelsReductionEnabled = prefs[Keys.REELS_REDUCTION_ENABLED] ?: false,
-        notificationFilterEnabled = prefs[Keys.NOTIFICATION_FILTER_ENABLED] ?: false,
-        appOpeningCooldownSeconds = prefs[Keys.APP_COOLDOWN_SEC] ?: 10,
-        ambientSoundType =
-          runCatching { AmbientSoundType.valueOf(prefs[Keys.AMBIENT_SOUND_TYPE] ?: "OFF") }
-            .getOrDefault(AmbientSoundType.OFF),
-        ambientSoundVolume = (prefs[Keys.AMBIENT_SOUND_VOLUME] ?: 0.45f).coerceIn(0f, 1f),
-        launchPauseEnabled = prefs[Keys.LAUNCH_PAUSE_ENABLED] ?: false,
-        launchPauseSeconds = (prefs[Keys.LAUNCH_PAUSE_SECONDS] ?: 8).coerceIn(5, 15),
-        launchPausePackages =
-          (prefs[Keys.LAUNCH_PAUSE_PACKAGES] ?: "")
-            .split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .toSet(),
-        windDownDateKey = prefs[Keys.WINDDOWN_DATE_KEY] ?: "",
-        windDownCompletedIds =
-          (prefs[Keys.WINDDOWN_COMPLETED_IDS] ?: "")
-            .split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .toSet(),
-      )
-    }
+    context.focusNestDataStore.data.map { prefs -> decodeSettings(prefs) }
+
+  val settingsResultFlow: Flow<Result<FocusNestSettings>> =
+    context.focusNestDataStore.data
+      .map { prefs -> Result.success(decodeSettings(prefs)) }
+
+  private fun decodeSettings(prefs: Preferences): FocusNestSettings =
+    FocusNestSettings(
+      onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: false,
+      onboardingVersion = prefs[Keys.ONBOARDING_VERSION] ?: 0,
+      onboardingCompletedEpochMs = prefs[Keys.ONBOARDING_COMPLETED_AT] ?: 0L,
+      showSystemAppsInStats = prefs[Keys.SHOW_SYSTEM_APPS] ?: false,
+      themeMode =
+        runCatching { ThemeMode.valueOf(prefs[Keys.THEME_MODE] ?: "SYSTEM") }
+          .getOrDefault(ThemeMode.SYSTEM),
+      accentPalette =
+        runCatching { AccentPalette.valueOf(prefs[Keys.ACCENT_PALETTE] ?: "EMERALD_SAGE") }
+          .getOrDefault(AccentPalette.EMERALD_SAGE),
+      dynamicColorEnabled = prefs[Keys.DYNAMIC_COLOR] ?: false,
+      languageCode = prefs[Keys.LANGUAGE_CODE] ?: "en",
+      dailyIntention = prefs[Keys.DAILY_INTENTION] ?: "",
+      quickBlockerEnabled = prefs[Keys.QUICK_BLOCKER_ENABLED] ?: false,
+      pomodoroFocusMinutes = prefs[Keys.POMO_FOCUS_MIN] ?: 25,
+      pomodoroShortBreakMinutes = prefs[Keys.POMO_SHORT_BREAK_MIN] ?: 5,
+      pomodoroLongBreakMinutes = prefs[Keys.POMO_LONG_BREAK_MIN] ?: 15,
+      pomodoroLongBreakInterval = prefs[Keys.POMO_LONG_BREAK_INTERVAL] ?: 4,
+      pomodoroTargetCycles = prefs[Keys.POMO_TARGET_CYCLES] ?: 4,
+      autoStartNextSession = prefs[Keys.AUTO_START_NEXT] ?: false,
+      soundEnabled = prefs[Keys.SOUND_ENABLED] ?: true,
+      vibrationEnabled = prefs[Keys.VIBRATION_ENABLED] ?: true,
+      invincibleModeEnabled = prefs[Keys.INVINCIBLE_ENABLED] ?: false,
+      invincibleDelayMinutes = prefs[Keys.INVINCIBLE_DELAY_MIN] ?: 15,
+      invincibleBiometricRequired = prefs[Keys.INVINCIBLE_BIOMETRIC] ?: false,
+      invinciblePendingUnlockAtEpochMs = prefs[Keys.INVINCIBLE_PENDING_UNLOCK] ?: 0L,
+      emergencyPasscodeHash = prefs[Keys.EMERGENCY_PASSCODE_HASH] ?: "",
+      bedtimeEnabled = prefs[Keys.BEDTIME_ENABLED] ?: false,
+      bedtimeStartMinute = prefs[Keys.BEDTIME_START] ?: (22 * 60 + 30),
+      bedtimeEndMinute = prefs[Keys.BEDTIME_END] ?: (7 * 60),
+      bedtimeDndEnabled = prefs[Keys.BEDTIME_DND] ?: false,
+      breakReminderEnabled = prefs[Keys.BREAK_REMINDER_ENABLED] ?: false,
+      breakReminderIntervalMinutes = prefs[Keys.BREAK_REMINDER_MIN] ?: 45,
+      vpnBlockingEnabled = prefs[Keys.VPN_BLOCKING_ENABLED] ?: false,
+      blockedNetworkPackages =
+        (prefs[Keys.BLOCKED_NETWORK_PACKAGES] ?: "")
+          .split(",")
+          .map { it.trim() }
+          .filter { it.isNotEmpty() }
+          .toSet(),
+      reelsReductionEnabled = prefs[Keys.REELS_REDUCTION_ENABLED] ?: false,
+      notificationFilterEnabled = prefs[Keys.NOTIFICATION_FILTER_ENABLED] ?: false,
+      appOpeningCooldownSeconds = prefs[Keys.APP_COOLDOWN_SEC] ?: 10,
+      ambientSoundType =
+        runCatching { AmbientSoundType.valueOf(prefs[Keys.AMBIENT_SOUND_TYPE] ?: "OFF") }
+          .getOrDefault(AmbientSoundType.OFF),
+      ambientSoundVolume = (prefs[Keys.AMBIENT_SOUND_VOLUME] ?: 0.45f).coerceIn(0f, 1f),
+      launchPauseEnabled = prefs[Keys.LAUNCH_PAUSE_ENABLED] ?: false,
+      launchPauseSeconds = (prefs[Keys.LAUNCH_PAUSE_SECONDS] ?: 8).coerceIn(5, 15),
+      launchPausePackages =
+        (prefs[Keys.LAUNCH_PAUSE_PACKAGES] ?: "")
+          .split(",")
+          .map { it.trim() }
+          .filter { it.isNotEmpty() }
+          .toSet(),
+      windDownDateKey = prefs[Keys.WINDDOWN_DATE_KEY] ?: "",
+      windDownCompletedIds =
+        (prefs[Keys.WINDDOWN_COMPLETED_IDS] ?: "")
+          .split(",")
+          .map { it.trim() }
+          .filter { it.isNotEmpty() }
+          .toSet(),
+    )
 
   val timerStateFlow: Flow<PersistedTimerState> =
     context.focusNestDataStore.data.map { prefs ->
@@ -232,70 +267,12 @@ class FocusNestPreferences(private val context: Context) {
 
   suspend fun updateSettings(transform: (FocusNestSettings) -> FocusNestSettings) {
     context.focusNestDataStore.edit { prefs ->
-      val current =
-        FocusNestSettings(
-          onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: false,
-          themeMode =
-            runCatching { ThemeMode.valueOf(prefs[Keys.THEME_MODE] ?: "SYSTEM") }
-              .getOrDefault(ThemeMode.SYSTEM),
-          accentPalette =
-            runCatching { AccentPalette.valueOf(prefs[Keys.ACCENT_PALETTE] ?: "EMERALD_SAGE") }
-              .getOrDefault(AccentPalette.EMERALD_SAGE),
-          dynamicColorEnabled = prefs[Keys.DYNAMIC_COLOR] ?: false,
-          languageCode = prefs[Keys.LANGUAGE_CODE] ?: "en",
-          dailyIntention = prefs[Keys.DAILY_INTENTION] ?: "",
-          quickBlockerEnabled = prefs[Keys.QUICK_BLOCKER_ENABLED] ?: false,
-          pomodoroFocusMinutes = prefs[Keys.POMO_FOCUS_MIN] ?: 25,
-          pomodoroShortBreakMinutes = prefs[Keys.POMO_SHORT_BREAK_MIN] ?: 5,
-          pomodoroLongBreakMinutes = prefs[Keys.POMO_LONG_BREAK_MIN] ?: 15,
-          pomodoroLongBreakInterval = prefs[Keys.POMO_LONG_BREAK_INTERVAL] ?: 4,
-          pomodoroTargetCycles = prefs[Keys.POMO_TARGET_CYCLES] ?: 4,
-          autoStartNextSession = prefs[Keys.AUTO_START_NEXT] ?: false,
-          soundEnabled = prefs[Keys.SOUND_ENABLED] ?: true,
-          vibrationEnabled = prefs[Keys.VIBRATION_ENABLED] ?: true,
-          invincibleModeEnabled = prefs[Keys.INVINCIBLE_ENABLED] ?: false,
-          invincibleDelayMinutes = prefs[Keys.INVINCIBLE_DELAY_MIN] ?: 15,
-          invincibleBiometricRequired = prefs[Keys.INVINCIBLE_BIOMETRIC] ?: false,
-          invinciblePendingUnlockAtEpochMs = prefs[Keys.INVINCIBLE_PENDING_UNLOCK] ?: 0L,
-          emergencyPasscodeHash = prefs[Keys.EMERGENCY_PASSCODE_HASH] ?: "",
-          bedtimeEnabled = prefs[Keys.BEDTIME_ENABLED] ?: false,
-          bedtimeStartMinute = prefs[Keys.BEDTIME_START] ?: (22 * 60 + 30),
-          bedtimeEndMinute = prefs[Keys.BEDTIME_END] ?: (7 * 60),
-          bedtimeDndEnabled = prefs[Keys.BEDTIME_DND] ?: false,
-          breakReminderEnabled = prefs[Keys.BREAK_REMINDER_ENABLED] ?: false,
-          breakReminderIntervalMinutes = prefs[Keys.BREAK_REMINDER_MIN] ?: 45,
-          vpnBlockingEnabled = prefs[Keys.VPN_BLOCKING_ENABLED] ?: false,
-          blockedNetworkPackages =
-            (prefs[Keys.BLOCKED_NETWORK_PACKAGES] ?: "")
-              .split(",")
-              .map { it.trim() }
-              .filter { it.isNotEmpty() }
-              .toSet(),
-          reelsReductionEnabled = prefs[Keys.REELS_REDUCTION_ENABLED] ?: false,
-          notificationFilterEnabled = prefs[Keys.NOTIFICATION_FILTER_ENABLED] ?: false,
-          appOpeningCooldownSeconds = prefs[Keys.APP_COOLDOWN_SEC] ?: 10,
-          ambientSoundType =
-            runCatching { AmbientSoundType.valueOf(prefs[Keys.AMBIENT_SOUND_TYPE] ?: "OFF") }
-              .getOrDefault(AmbientSoundType.OFF),
-          ambientSoundVolume = (prefs[Keys.AMBIENT_SOUND_VOLUME] ?: 0.45f).coerceIn(0f, 1f),
-          launchPauseEnabled = prefs[Keys.LAUNCH_PAUSE_ENABLED] ?: false,
-          launchPauseSeconds = (prefs[Keys.LAUNCH_PAUSE_SECONDS] ?: 8).coerceIn(5, 15),
-          launchPausePackages =
-            (prefs[Keys.LAUNCH_PAUSE_PACKAGES] ?: "")
-              .split(",")
-              .map { it.trim() }
-              .filter { it.isNotEmpty() }
-              .toSet(),
-          windDownDateKey = prefs[Keys.WINDDOWN_DATE_KEY] ?: "",
-          windDownCompletedIds =
-            (prefs[Keys.WINDDOWN_COMPLETED_IDS] ?: "")
-              .split(",")
-              .map { it.trim() }
-              .filter { it.isNotEmpty() }
-              .toSet(),
-        )
+      val current = decodeSettings(prefs)
       val next = transform(current)
       prefs[Keys.ONBOARDING_COMPLETED] = next.onboardingCompleted
+      prefs[Keys.ONBOARDING_VERSION] = next.onboardingVersion
+      prefs[Keys.ONBOARDING_COMPLETED_AT] = next.onboardingCompletedEpochMs
+      prefs[Keys.SHOW_SYSTEM_APPS] = next.showSystemAppsInStats
       prefs[Keys.THEME_MODE] = next.themeMode.name
       prefs[Keys.ACCENT_PALETTE] = next.accentPalette.name
       prefs[Keys.DYNAMIC_COLOR] = next.dynamicColorEnabled
@@ -334,6 +311,23 @@ class FocusNestPreferences(private val context: Context) {
       prefs[Keys.WINDDOWN_DATE_KEY] = next.windDownDateKey
       prefs[Keys.WINDDOWN_COMPLETED_IDS] = next.windDownCompletedIds.joinToString(",")
     }
+  }
+
+  suspend fun markOnboardingCompleted(
+    version: Int = CURRENT_ONBOARDING_VERSION,
+    epochMs: Long = System.currentTimeMillis(),
+  ) {
+    updateSettings { cur ->
+      cur.copy(
+        onboardingCompleted = true,
+        onboardingVersion = version,
+        onboardingCompletedEpochMs = epochMs,
+      )
+    }
+  }
+
+  suspend fun setShowSystemApps(show: Boolean) {
+    updateSettings { cur -> cur.copy(showSystemAppsInStats = show) }
   }
 
   suspend fun saveTimerState(state: PersistedTimerState) {

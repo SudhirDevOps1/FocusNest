@@ -3,6 +3,7 @@ package com.example.feature.onboarding
 import android.Manifest
 import android.net.VpnService
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -85,15 +86,28 @@ fun OnboardingScreen(
     firstProfileName: String,
     firstFocusMinutes: Int,
   ) -> Unit,
+  isTutorialReplay: Boolean = false,
+  initialScreenGoalMin: Int = 180,
+  initialFocusGoalMin: Int = 60,
+  initialSelectedApps: Set<String> = emptySet(),
+  onBackFromTutorial: (() -> Unit)? = null,
 ) {
   val context = LocalContext.current
   var step by rememberSaveable { mutableIntStateOf(1) }
-  var screenGoalMin by rememberSaveable { mutableIntStateOf(180) }
-  var focusGoalMin by rememberSaveable { mutableIntStateOf(60) }
-  var selectedApps by rememberSaveable { mutableStateOf(setOf<String>()) }
+  var screenGoalMin by rememberSaveable { mutableIntStateOf(initialScreenGoalMin) }
+  var focusGoalMin by rememberSaveable { mutableIntStateOf(initialFocusGoalMin) }
+  var selectedApps by rememberSaveable { mutableStateOf(initialSelectedApps) }
   var appSearch by rememberSaveable { mutableStateOf("") }
   var profileName by rememberSaveable { mutableStateOf("Daily Deep Work") }
   var profileFocusMin by rememberSaveable { mutableIntStateOf(25) }
+
+  BackHandler(enabled = isTutorialReplay || step > 1) {
+    if (step > 1) {
+      step--
+    } else if (isTutorialReplay) {
+      onBackFromTutorial?.invoke()
+    }
+  }
 
   val notifPermissionLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -122,9 +136,11 @@ fun OnboardingScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
       ) {
-        if (step > 1) {
+        if (step > 1 || (isTutorialReplay && onBackFromTutorial != null)) {
           IconButton(
-            onClick = { step-- },
+            onClick = {
+              if (step > 1) step-- else onBackFromTutorial?.invoke()
+            },
             modifier = Modifier.testTag("onboarding_back_btn"),
           ) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous step")
@@ -133,17 +149,21 @@ fun OnboardingScreen(
           FocusNestLogoMark(size = 34.dp)
         }
         Text(
-          text = "Step $step of 10",
+          text = if (isTutorialReplay) "Tutorial • Step $step of 10" else "Step $step of 10",
           style = MaterialTheme.typography.labelMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         TextButton(
           onClick = {
-            onComplete(screenGoalMin, focusGoalMin, selectedApps, profileName, profileFocusMin)
+            if (isTutorialReplay && onBackFromTutorial != null) {
+              onBackFromTutorial()
+            } else {
+              onComplete(screenGoalMin, focusGoalMin, selectedApps, profileName, profileFocusMin)
+            }
           },
           modifier = Modifier.testTag("onboarding_skip_all_btn"),
         ) {
-          Text("Skip")
+          Text(if (isTutorialReplay) "Close" else "Skip")
         }
       }
 
@@ -342,16 +362,17 @@ fun OnboardingScreen(
             val filtered =
               remember(installedApps, appSearch) {
                 installedApps.filter {
-                  appSearch.isBlank() ||
-                    it.appName.contains(appSearch, ignoreCase = true) ||
-                    it.packageName.contains(appSearch, ignoreCase = true)
+                  !it.isSystemApp &&
+                    (appSearch.isBlank() ||
+                      it.appName.contains(appSearch, ignoreCase = true) ||
+                      it.packageName.contains(appSearch, ignoreCase = true))
                 }
               }
             Column(modifier = Modifier.fillMaxSize()) {
               StepHeader(
                 icon = Icons.Default.Lock,
                 title = "Select Distracting Apps",
-                description = "Pick apps you want included in your Quick Shield and focus sessions (you can edit anytime).",
+                description = "Pick apps you want included in your Quick Shield and focus sessions. Your home launcher and system UI are safely excluded.",
               )
               Spacer(modifier = Modifier.height(10.dp))
               OutlinedTextField(

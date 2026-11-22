@@ -95,7 +95,10 @@ import com.example.core.datastore.FocusNestSettings
 import com.example.core.design.FocusNestEmptyState
 import com.example.core.design.SanctuaryCard
 import com.example.core.design.SectionHeader
+import com.example.core.permissions.PermissionDiagnosticItem
+import com.example.core.permissions.PermissionKind
 import com.example.core.permissions.PermissionManager
+import com.example.core.permissions.PermissionStatusManager
 import com.example.domain.model.AccentPalette
 import com.example.domain.model.BedtimeChecklistDefaults
 import com.example.domain.model.FocusTimeUtils
@@ -160,6 +163,8 @@ fun MoreScreen(
   onClearHabits: () -> Unit = {},
   onToggleWindDownStep: (String) -> Unit = {},
   onOpenReleases: () -> Unit = {},
+  onToggleShowSystemApps: (Boolean) -> Unit = {},
+  onReplayTutorial: () -> Unit = {},
 ) {
   var subPage by rememberSaveable { mutableStateOf(MoreSubPage.HUB) }
 
@@ -231,6 +236,8 @@ fun MoreScreen(
             onUpdateAppearance = onUpdateAppearance,
             onUpdateGoals = onUpdateGoals,
             onOpenReleases = onOpenReleases,
+            onToggleShowSystemApps = onToggleShowSystemApps,
+            onReplayTutorial = onReplayTutorial,
             onBuildEncryptedBackup = onBuildEncryptedBackup,
             onRestoreBackup = onRestoreBackup,
             onClearUsageHistory = onClearUsageHistory,
@@ -296,7 +303,7 @@ private fun MoreHubList(
   modifier: Modifier = Modifier,
 ) {
   LazyColumn(
-    modifier = modifier.fillMaxSize(),
+    modifier = modifier.fillMaxSize().testTag("more_hub_lazy_list"),
     contentPadding = PaddingValues(16.dp),
     verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {
@@ -827,7 +834,7 @@ private fun MindfulSubPage(
   Column(modifier = Modifier.fillMaxSize()) {
     SubPageHeader("Mindful Usage Tools", onBack)
     LazyColumn(
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize().testTag("mindful_lazy_list"),
       contentPadding = PaddingValues(16.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -1044,10 +1051,17 @@ private fun PermissionsSubPage(
 ) {
   val context = LocalContext.current
   val oem = remember { OemCompatibilityHelper.getGuidance() }
+  val diagnostics = remember(permissions) { PermissionStatusManager.buildDiagnostics(permissions) }
+  var launchFeedback by remember { mutableStateOf<String?>(null) }
   val notifLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { onRefresh() }
   val cameraLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { onRefresh() }
+
+  fun openSettingsSafely(intent: android.content.Intent, label: String) {
+    val ok = PermissionManager.safeStartSettings(context, intent)
+    launchFeedback = if (ok) null else "Could not open $label system screen on this device."
+  }
 
   Column(modifier = Modifier.fillMaxSize()) {
     SubPageHeader("Permissions & OEM Guide", onBack)
@@ -1057,46 +1071,60 @@ private fun PermissionsSubPage(
       verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       item {
-        OutlinedButton(onClick = onRefresh, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(
+          onClick = onRefresh,
+          modifier = Modifier.fillMaxWidth().testTag("permissions_refresh_btn"),
+        ) {
           Text("Refresh All Permission States")
         }
       }
-      item {
-        PermissionRow("Usage Access (UsageStatsManager)", permissions.usageStatsGranted) {
-          PermissionManager.safeStartSettings(context, PermissionManager.usageAccessIntent(context))
+      if (permissions.revokedPermissions.isNotEmpty()) {
+        item {
+          SanctuaryCard(highlight = true) {
+            Text(
+              "Permission revoked since last check: ${permissions.revokedPermissions.joinToString(", ")}. Re-grant below to restore automatic protection.",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.error,
+              modifier = Modifier.padding(14.dp).testTag("permissions_revoked_banner"),
+            )
+          }
         }
       }
-      item {
-        PermissionRow("Accessibility (App & Reels Blocking)", permissions.accessibilityEnabled) {
-          PermissionManager.safeStartSettings(context, PermissionManager.accessibilitySettingsIntent())
-        }
-      }
-      item {
-        PermissionRow("Local VPN Website Filter", permissions.vpnPrepared && permissions.vpnActive) {
-          onRefresh()
-        }
-      }
-      item {
-        PermissionRow("Notification Listener", permissions.notificationListenerEnabled) {
-          PermissionManager.safeStartSettings(context, PermissionManager.notificationListenerSettingsIntent())
-        }
-      }
-      item {
-        PermissionRow("Post Notifications", permissions.postNotificationsGranted) {
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+      launchFeedback?.let { err ->
+        item {
+          SanctuaryCard {
+            Text(
+              err,
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.error,
+              modifier = Modifier.padding(14.dp),
+            )
           }
         }
       }
       item {
-        PermissionRow("Camera (Offline QR/Barcode Scan)", permissions.cameraGranted) {
-          cameraLauncher.launch(Manifest.permission.CAMERA)
-        }
+        SectionHeader("Permission Diagnostics", subtitle = "Grouped by Runtime vs Special Access requirements")
       }
-      item {
-        PermissionRow("Unrestricted Battery (Recommended)", permissions.ignoringBatteryOptimizations) {
-          PermissionManager.safeStartSettings(context, PermissionManager.batteryOptimizationIntent(context))
-        }
+      items(diagnostics, key = { it.id }) { item ->
+        PermissionDiagnosticRow(
+          item = item,
+          onConfigure = {
+            when (item.id) {
+              "usage_access" -> openSettingsSafely(PermissionManager.usageAccessIntent(context), item.title)
+              "accessibility" -> openSettingsSafely(PermissionManager.accessibilitySettingsIntent(), item.title)
+              "vpn_filter" -> onRefresh()
+              "notifications_listener" -> openSettingsSafely(PermissionManager.notificationListenerSettingsIntent(), item.title)
+              "dnd_policy" -> openSettingsSafely(PermissionManager.dndPolicySettingsIntent(), item.title)
+              "post_notifications" -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                  notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+              }
+              "camera" -> cameraLauncher.launch(Manifest.permission.CAMERA)
+              "battery" -> openSettingsSafely(PermissionManager.batteryOptimizationIntent(context), item.title)
+            }
+          },
+        )
       }
       item {
         SanctuaryCard(highlight = oem.hasAggressiveBackgroundKilling) {
@@ -1113,22 +1141,47 @@ private fun PermissionsSubPage(
 }
 
 @Composable
-private fun PermissionRow(title: String, granted: Boolean, onConfigure: () -> Unit) {
-  SanctuaryCard(highlight = granted) {
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(14.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(title, style = MaterialTheme.typography.titleMedium)
-        Text(
-          if (granted) "Active" else "Not enabled",
-          style = MaterialTheme.typography.bodyMedium,
-          color = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+private fun PermissionDiagnosticRow(
+  item: PermissionDiagnosticItem,
+  onConfigure: () -> Unit,
+) {
+  val kindLabel =
+    when (item.kind) {
+      PermissionKind.RUNTIME -> "Runtime"
+      PermissionKind.SPECIAL_ACCESS -> "Special Access"
+      PermissionKind.SYSTEM_CONSENT -> "System Consent"
+    }
+  SanctuaryCard(highlight = item.granted) {
+    Column(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          Text(item.title, style = MaterialTheme.typography.titleMedium)
+          Text(
+            "$kindLabel • " +
+              when {
+                item.wasRevoked -> "Revoked since last check"
+                item.granted -> "Granted & Active"
+                else -> "Optional / Not Enabled"
+              },
+            style = MaterialTheme.typography.labelLarge,
+            color =
+              when {
+                item.wasRevoked -> MaterialTheme.colorScheme.error
+                item.granted -> MaterialTheme.colorScheme.primary
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+              },
+          )
+        }
+        OutlinedButton(onClick = onConfigure) { Text("Configure") }
       }
-      OutlinedButton(onClick = onConfigure) { Text("Configure") }
+      Text(item.summary, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+      item.androidNote?.let { note ->
+        Text(note, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary)
+      }
     }
   }
 }
@@ -1142,6 +1195,8 @@ private fun SettingsSubPage(
   onUpdateAppearance: (ThemeMode?, AccentPalette?, Boolean?, String?) -> Unit,
   onUpdateGoals: (Int, Int, Int, Int) -> Unit,
   onOpenReleases: () -> Unit,
+  onToggleShowSystemApps: (Boolean) -> Unit,
+  onReplayTutorial: () -> Unit,
   onBuildEncryptedBackup: suspend (String) -> String,
   onRestoreBackup: suspend (String, String?) -> Result<Int>,
   onClearUsageHistory: () -> Unit,
@@ -1185,7 +1240,7 @@ private fun SettingsSubPage(
   Column(modifier = Modifier.fillMaxSize()) {
     SubPageHeader("Settings & Encrypted Backup", onBack)
     LazyColumn(
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize().testTag("settings_lazy_list"),
       contentPadding = PaddingValues(16.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -1275,6 +1330,39 @@ private fun SettingsSubPage(
       item {
         SanctuaryCard {
           Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("Usage Filtering & Setup Guide", style = MaterialTheme.typography.titleMedium)
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Column(modifier = Modifier.weight(1f)) {
+                Text("Show System & Launcher Apps", style = MaterialTheme.typography.titleSmall)
+                Text(
+                  "Exclude home launchers, SystemUI & keyboards by default for clean distraction analytics.",
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+              }
+              Switch(
+                checked = settings.showSystemAppsInStats,
+                onCheckedChange = onToggleShowSystemApps,
+                modifier = Modifier.testTag("settings_show_system_switch"),
+              )
+            }
+            OutlinedButton(
+              onClick = onReplayTutorial,
+              modifier = Modifier.fillMaxWidth().testTag("settings_replay_tutorial_btn"),
+            ) {
+              Text("Replay Onboarding Tutorial (Keeps Existing Rules)")
+            }
+          }
+        }
+      }
+
+      item {
+        SanctuaryCard {
+          Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
               Icon(Icons.Default.Backup, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
               Spacer(modifier = Modifier.width(8.dp))
@@ -1333,9 +1421,6 @@ private fun SettingsSubPage(
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            UpdateReleaseConfig.latestHighlights.forEach { bullet ->
-              Text("• $bullet", style = MaterialTheme.typography.bodySmall)
-            }
             Button(
               onClick = onOpenReleases,
               modifier = Modifier.fillMaxWidth().testTag("more_check_updates_btn"),
@@ -1343,6 +1428,9 @@ private fun SettingsSubPage(
               Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
               Spacer(modifier = Modifier.width(6.dp))
               Text("Check Releases on GitHub")
+            }
+            UpdateReleaseConfig.latestHighlights.forEach { bullet ->
+              Text("• $bullet", style = MaterialTheme.typography.bodySmall)
             }
           }
         }
@@ -1440,6 +1528,11 @@ private fun PrivacyAndAboutSubPage(
             Text(
               "100% Free • No Ads • No Trackers • No Cloud Accounts • No Internet Permission.",
               style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(
+              "Created & maintained by ${UpdateReleaseConfig.DEVELOPER_NAME} (${UpdateReleaseConfig.GITHUB_OWNER_REPO})",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             OutlinedButton(
               onClick = onOpenReleases,

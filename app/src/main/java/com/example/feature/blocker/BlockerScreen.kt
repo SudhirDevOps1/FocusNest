@@ -72,10 +72,15 @@ import com.example.core.design.InstalledAppIcon
 import com.example.core.design.SanctuaryCard
 import com.example.core.design.SectionHeader
 import com.example.core.permissions.PermissionManager
+import com.example.domain.blocker.RuleEvaluator
 import com.example.domain.model.AppCategory
 import com.example.domain.model.FocusTimeUtils
 import com.example.domain.model.PermissionSnapshot
 import com.example.domain.model.UnlockChallengeType
+import com.example.domain.model.VpnConnectionState
+import com.example.domain.model.VpnDiagnostics
+import com.example.domain.model.WebsiteRuleEvaluation
+import com.example.domain.model.WebsiteRuleOutcome
 import com.example.ui.blocker.BlockedOverlayActivity
 import java.util.Locale
 
@@ -117,6 +122,9 @@ fun BlockerScreen(
   onToggleBlockedNetworkPackage: (String, Boolean) -> Unit = { _, _ -> },
   onUpdateLaunchPauseConfig: (Boolean?, Int?) -> Unit = { _, _ -> },
   onToggleLaunchPausePackage: (String, Boolean) -> Unit = { _, _ -> },
+  vpnDiagnostics: VpnDiagnostics = VpnDiagnostics(),
+  onVerifyWebsiteDomain: (String) -> WebsiteRuleEvaluation = { RuleEvaluator.evaluateDomain(it, emptyList()) },
+  onToggleShowSystemApps: (Boolean) -> Unit = {},
 ) {
   val context = LocalContext.current
   var selectedTab by rememberSaveable { mutableIntStateOf(0) }
@@ -131,6 +139,8 @@ fun BlockerScreen(
   var showCreateScheduleDialog by remember { mutableStateOf(false) }
   var newDomainInput by rememberSaveable { mutableStateOf("") }
   var newDomainAllowlist by rememberSaveable { mutableStateOf(false) }
+  var verifyDomainInput by rememberSaveable { mutableStateOf("") }
+  var verifyResult by remember { mutableStateOf<WebsiteRuleEvaluation?>(null) }
 
   val vpnLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -383,7 +393,19 @@ fun BlockerScreen(
                     label = { Text(cat.label) },
                   )
                 }
+                FilterChip(
+                  selected = settings.showSystemAppsInStats,
+                  onClick = { onToggleShowSystemApps(!settings.showSystemAppsInStats) },
+                  label = { Text(if (settings.showSystemAppsInStats) "System Apps: On" else "Show System") },
+                  modifier = Modifier.testTag("blocker_show_system_chip"),
+                )
               }
+              Spacer(modifier = Modifier.height(6.dp))
+              Text(
+                "Active home launcher, SystemUI, keyboards & FocusNest are always protected from accidental lockouts.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
             }
 
             if (filteredApps.isEmpty()) {
@@ -646,12 +668,16 @@ fun BlockerScreen(
 
       3 -> {
         LazyColumn(
-          modifier = Modifier.fillMaxSize(),
+          modifier = Modifier.fillMaxSize().testTag("website_lazy_list"),
           contentPadding = PaddingValues(16.dp),
           verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           item {
-            SanctuaryCard(highlight = permissions.vpnActive) {
+            val isVpnActiveOrStarting =
+              permissions.vpnActive ||
+                vpnDiagnostics.state == VpnConnectionState.CONNECTED ||
+                vpnDiagnostics.state == VpnConnectionState.CONNECTING
+            SanctuaryCard(highlight = isVpnActiveOrStarting) {
               Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(
                   modifier = Modifier.fillMaxWidth(),
@@ -661,22 +687,36 @@ fun BlockerScreen(
                   Column(modifier = Modifier.weight(1f)) {
                     Text("Local On-Device Website Filter", style = MaterialTheme.typography.titleLarge)
                     Text(
-                      if (permissions.vpnActive) "Local DNS sinkhole active"
-                      else "Inactive • Requires explicit Android VPN consent",
+                      "${vpnDiagnostics.state.label} • ${vpnDiagnostics.statusMessage}",
                       style = MaterialTheme.typography.bodyMedium,
-                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                      color =
+                        if (vpnDiagnostics.state == VpnConnectionState.ERROR) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                   }
                   Icon(Icons.Default.Language, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 }
                 Text(
-                  "FocusNest runs an on-device local DNS filter using VpnService. No browsing history leaves your phone, no remote VPN servers are used, and enabling this replaces any other active Android VPN.",
-                  style = MaterialTheme.typography.bodyMedium,
+                  "Rules active: ${vpnDiagnostics.activeRuleCount} (${vpnDiagnostics.blocklistCount} blocked • ${vpnDiagnostics.allowlistCount} allowlisted) • Queries checked: ${vpnDiagnostics.packetsInspected} • Blocked DNS: ${vpnDiagnostics.blockedQueriesCount}",
+                  style = MaterialTheme.typography.labelLarge,
+                  color = MaterialTheme.colorScheme.primary,
+                )
+                if (!vpnDiagnostics.lastError.isNullOrBlank()) {
+                  Text(
+                    "VPN Notice: ${vpnDiagnostics.lastError}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag("vpn_error_banner"),
+                  )
+                }
+                Text(
+                  "On-device DNS sinkhole using Android VpnService—zero browsing history leaves your phone. Note: ${vpnDiagnostics.privateDnsDisclosure}",
+                  style = MaterialTheme.typography.bodySmall,
                   color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Button(
                   onClick = {
-                    if (permissions.vpnActive) {
+                    if (isVpnActiveOrStarting) {
                       onStopVpn()
                     } else {
                       val prepareIntent = VpnService.prepare(context)
@@ -686,7 +726,54 @@ fun BlockerScreen(
                   },
                   modifier = Modifier.fillMaxWidth().testTag("vpn_toggle_btn"),
                 ) {
-                  Text(if (permissions.vpnActive) "Stop Local Website Filter" else "Start Local Website Filter")
+                  Text(if (isVpnActiveOrStarting) "Stop Local Website Filter" else "Start Local Website Filter")
+                }
+              }
+            }
+          }
+
+          item {
+            SanctuaryCard {
+              Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("Verify Domain Rule Matching", style = MaterialTheme.typography.titleMedium)
+                Text(
+                  "Test how a URL or subdomain resolves against your allowlist (priority override) and blocklist before browsing.",
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                ) {
+                  OutlinedTextField(
+                    value = verifyDomainInput,
+                    onValueChange = { verifyDomainInput = it },
+                    label = { Text("Test URL or domain (e.g. m.youtube.com)") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f).testTag("website_verify_input"),
+                  )
+                  OutlinedButton(
+                    onClick = { verifyResult = onVerifyWebsiteDomain(verifyDomainInput) },
+                    modifier = Modifier.testTag("website_verify_btn"),
+                  ) {
+                    Text("Test")
+                  }
+                }
+                verifyResult?.let { res ->
+                  Text(
+                    text =
+                      "${res.normalizedDomain.ifBlank { "(empty)" }} → ${res.outcome.label}" +
+                        (res.matchedRuleDomain?.let { " (matched: $it)" } ?: ""),
+                    style = MaterialTheme.typography.labelLarge,
+                    color =
+                      when (res.outcome) {
+                        WebsiteRuleOutcome.BLOCKED -> MaterialTheme.colorScheme.error
+                        WebsiteRuleOutcome.ALLOWLISTED -> MaterialTheme.colorScheme.primary
+                        WebsiteRuleOutcome.ALLOWED_NO_MATCH -> MaterialTheme.colorScheme.onSurfaceVariant
+                      },
+                    modifier = Modifier.testTag("website_verify_result"),
+                  )
                 }
               }
             }

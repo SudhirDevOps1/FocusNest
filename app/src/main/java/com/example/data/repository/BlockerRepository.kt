@@ -26,15 +26,16 @@ import com.example.core.database.UnlockRuleEntity
 import com.example.core.database.WebsiteRuleDao
 import com.example.core.database.WebsiteRuleEntity
 import com.example.core.datastore.FocusNestPreferences
+import com.example.domain.blocker.RuleEvaluationInput
+import com.example.domain.blocker.RuleEvaluator
 import com.example.domain.model.ActiveBlockDecision
 import com.example.domain.model.FocusTimeUtils
 import com.example.domain.model.LimitThresholdLevel
 import com.example.domain.model.ReelsTargetApp
-import com.example.domain.model.RulePriorityResolver
+import com.example.domain.model.SystemEnvironmentSnapshot
 import com.example.domain.model.UnlockChallengeEngine
 import com.example.domain.model.UnlockChallengeType
-import java.time.Instant
-import java.time.ZoneId
+import com.example.domain.model.WebsiteRuleEvaluation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -53,6 +54,7 @@ class BlockerRepository(
   private val installedAppDao: InstalledAppDao,
   private val preferences: FocusNestPreferences,
   private val categoryLimitDao: CategoryLimitDao? = null,
+  private val systemEnvironmentProvider: () -> SystemEnvironmentSnapshot? = { null },
 ) {
   val appLimits: Flow<List<AppLimitEntity>> = appLimitDao.observeAll()
   val appGroups: Flow<List<AppGroupEntity>> = appGroupDao.observeAll()
@@ -205,6 +207,9 @@ class BlockerRepository(
   suspend fun saveWebsiteRule(rule: WebsiteRuleEntity): Long = websiteRuleDao.upsert(rule)
 
   suspend fun deleteWebsiteRule(rule: WebsiteRuleEntity) = websiteRuleDao.delete(rule)
+
+  suspend fun evaluateWebsiteDomain(rawQuery: String): WebsiteRuleEvaluation =
+    RuleEvaluator.evaluateDomain(rawQuery, websiteRuleDao.getAll())
 
   suspend fun installOfflineWebsitePack(packName: String) {
     val domains =
@@ -402,32 +407,15 @@ class BlockerRepository(
     nowEpochMs: Long = System.currentTimeMillis(),
   ): ActiveBlockDecision {
     val installed = installedAppDao.getAll().firstOrNull { it.packageName == packageName }
-    if (installed?.isEmergencyWhitelisted == true) {
-      return ActiveBlockDecision(isBlocked = false, reason = "Emergency whitelisted")
-    }
-
     val settings = preferences.settingsFlow.first()
     val timer = preferences.timerStateFlow.first()
     val limit = appLimitDao.getByPackage(packageName)
     val profiles = blockProfileDao.getAll()
     val schedules = blockingScheduleDao.getAll()
+    val appGroups = appGroupDao.getAll()
     val todayKey = FocusTimeUtils.todayKey(nowEpochMs)
     val usageToday = appUsageDao.getUsageForDate(todayKey)
-    val usedMinutesToday =
-      ((usageToday.firstOrNull { it.packageName == packageName }?.foregroundTimeMs ?: 0L) / 60_000L)
-        .toInt()
 
-    // Check shared group limits
-    val groups = appGroupDao.getAll().filter { it.isEnabled && packageName in it.packageNames }
-    val groupUsageMinutes =
-      groups.maxOfOrNull { group ->
-        usageToday.filter { it.packageName in group.packageNames }.sumOf { it.foregroundTimeMs } /
-          60_000L
-      }?.toInt() ?: 0
-    val tightestGroupLimit =
-      groups.filter { it.sharedDailyLimitMinutes > 0 }.minOfOrNull { it.sharedDailyLimitMinutes }
-
-    // Check weekly usage if weekly limit exists
     val weekStartKey = FocusTimeUtils.dateKeyDaysAgo(6)
     val usedMinutesWeek =
       if ((limit?.weeklyLimitMinutes ?: 0) > 0) {
@@ -439,95 +427,31 @@ class BlockerRepository(
         0
       }
 
-    // Active focus session linked profile OR quick blocker distracting apps
-    val focusLinkedProfile =
-      if (timer.isRunning && timer.phase.name == "FOCUS") {
-        profiles.firstOrNull { it.id == timer.linkedProfileId }
-          ?: profiles.firstOrNull { it.isActive }
-      } else {
-        null
-      }
-    val activeFocusBlocks =
-      timer.isRunning &&
-        timer.phase.name == "FOCUS" &&
-        ((focusLinkedProfile != null && packageName in focusLinkedProfile.blockedPackages) ||
-          (focusLinkedProfile == null && installed?.isSelectedDistracting == true))
-
-    // Active manual or scheduled profiles
-    val zoned = Instant.ofEpochMilli(nowEpochMs).atZone(ZoneId.systemDefault())
-    val dayOfWeek = zoned.dayOfWeek.value // 1=Mon..7=Sun
-    val minuteOfDay = zoned.hour * 60 + zoned.minute
-
-    val activeProfiles =
-      profiles.filter { profile ->
-        val scheduledNow =
-          schedules.any { sched ->
-            sched.profileId == profile.id &&
-              sched.isEnabled &&
-              dayOfWeek in sched.daysOfWeek &&
-              isMinuteInWindow(minuteOfDay, sched.startMinuteOfDay, sched.endMinuteOfDay)
-          }
-        (profile.isActive || scheduledNow) &&
-          packageName in profile.blockedPackages &&
-          packageName !in profile.allowedPackages
-      }
-    val topProfile = activeProfiles.maxByOrNull { it.priority }
-
-    val quickBlockerMatches =
-      settings.quickBlockerEnabled &&
-        (installed?.isSelectedDistracting == true || limit?.isBlockedManually == true)
-
-    val matchedProfileName =
-      topProfile?.name ?: if (quickBlockerMatches) "Quick Shield" else null
-    val matchedChallenge =
-      runCatching {
-          UnlockChallengeType.valueOf(
-            topProfile?.unlockPolicy
-              ?: limit?.challengeType
-              ?: UnlockChallengeType.REFLECTION_REMINDER.name
-          )
-        }
-        .getOrDefault(UnlockChallengeType.REFLECTION_REMINDER)
-
-    val effectiveDailyLimit =
-      listOfNotNull(
-          limit?.dailyLimitMinutes?.takeIf { it > 0 },
-          tightestGroupLimit,
-        )
-        .minOrNull()
-    val effectiveUsedToday = maxOf(usedMinutesToday, groupUsageMinutes)
-
     val appCategory =
       installed?.category?.takeIf { it.isNotBlank() } ?: limit?.categoryName?.takeIf { it.isNotBlank() }
     val catLimitEntity =
       if (appCategory != null) {
         categoryLimitDao?.getByCategory(appCategory)?.takeIf { it.isEnabled && it.dailyLimitMinutes > 0 }
-      } else null
-    val catUsedMinutes =
-      if (catLimitEntity != null) {
-        (usageToday.filter { it.category == catLimitEntity.categoryName }.sumOf { it.foregroundTimeMs } / 60_000L)
-          .toInt()
-      } else 0
+      } else {
+        null
+      }
 
-    return RulePriorityResolver.resolve(
-      packageName = packageName,
-      tempUnlockExpiresAtEpochMs = limit?.tempUnlockUntilEpochMs,
-      nowEpochMs = nowEpochMs,
-      activeFocusBlocksPackage = activeFocusBlocks,
-      activeFocusProfileName = focusLinkedProfile?.name ?: "Focus Session",
-      matchingScheduledProfileName = matchedProfileName,
-      matchingScheduledProfileId = topProfile?.id,
-      matchingScheduledPriority = topProfile?.priority ?: 1,
-      matchingChallenge = matchedChallenge,
-      isStrictMode = settings.invincibleModeEnabled || (topProfile?.strictMode == true),
-      usedMinutesToday = effectiveUsedToday,
-      dailyLimitMinutes = effectiveDailyLimit,
-      usedMinutesWeek = usedMinutesWeek,
-      weeklyLimitMinutes = limit?.weeklyLimitMinutes?.takeIf { it > 0 },
-      gracePeriodMinutes = limit?.gracePeriodMinutes ?: 0,
-      categoryUsedMinutesToday = catUsedMinutes,
-      categoryDailyLimitMinutes = catLimitEntity?.dailyLimitMinutes,
-      categoryName = catLimitEntity?.categoryName,
+    return RuleEvaluator.evaluateAppBlock(
+      RuleEvaluationInput(
+        packageName = packageName,
+        nowEpochMs = nowEpochMs,
+        settings = settings,
+        timer = timer,
+        installedApp = installed,
+        appLimit = limit,
+        profiles = profiles,
+        schedules = schedules,
+        appGroups = appGroups,
+        categoryLimit = catLimitEntity,
+        usageToday = usageToday,
+        usedMinutesWeek = usedMinutesWeek,
+        systemEnvironment = systemEnvironmentProvider(),
+      )
     )
   }
 
@@ -557,14 +481,5 @@ class BlockerRepository(
         updatedAtEpochMs = nowEpochMs,
       )
     )
-  }
-
-  private fun isMinuteInWindow(current: Int, start: Int, end: Int): Boolean {
-    return if (start <= end) {
-      current in start..end
-    } else {
-      // Overnight schedule (e.g. 22:30 -> 07:00)
-      current >= start || current <= end
-    }
   }
 }

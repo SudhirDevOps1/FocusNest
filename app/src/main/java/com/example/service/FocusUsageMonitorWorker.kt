@@ -2,6 +2,8 @@ package com.example.service
 
 import android.Manifest
 import android.app.PendingIntent
+import android.app.usage.UsageEvents
+import android.app.usage.UsageStatsManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -15,6 +17,8 @@ import androidx.work.WorkerParameters
 import com.example.FocusNestApplication
 import com.example.MainActivity
 import com.example.R
+import com.example.core.permissions.PermissionManager
+import com.example.domain.blocker.BlockingStateManager
 import com.example.domain.model.LimitThresholdLevel
 import com.example.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +54,14 @@ class FocusUsageMonitorWorker(
       }
     }
 
+    // UsageStats-only fallback reminder if Accessibility Service is off while Focus/Shield is active
+    if (
+      !PermissionManager.isAccessibilityServiceEnabled(applicationContext) &&
+        PermissionManager.hasUsageStatsPermission(applicationContext)
+    ) {
+      checkRecentForegroundFallback(app)
+    }
+
     val settings = app.container.preferences.settingsFlow.first()
     if (settings.breakReminderEnabled) {
       postGentleReminder(
@@ -60,6 +72,31 @@ class FocusUsageMonitorWorker(
       )
     }
     return Result.success()
+  }
+
+  private suspend fun checkRecentForegroundFallback(app: FocusNestApplication) {
+    val usm =
+      applicationContext.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return
+    val now = System.currentTimeMillis()
+    val events = runCatching { usm.queryEvents(now - 90_000L, now) }.getOrNull() ?: return
+    var latestForegroundPkg: String? = null
+    val ev = UsageEvents.Event()
+    while (events.hasNextEvent()) {
+      events.getNextEvent(ev)
+      if (ev.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
+        latestForegroundPkg = ev.packageName
+      }
+    }
+    val pkg = latestForegroundPkg ?: return
+    val decision = app.container.blockerRepository.evaluatePackageDecision(pkg, now)
+    if (decision.isBlocked && BlockingStateManager.shouldDispatchOverlay(pkg, now, cooldownMs = 60_000L)) {
+      postGentleReminder(
+        context = applicationContext,
+        notificationId = 4099,
+        title = "FocusNest Shield Active",
+        body = "${decision.profileName ?: "Protection rule"}: ${decision.reason}",
+      )
+    }
   }
 
   private fun postGentleReminder(

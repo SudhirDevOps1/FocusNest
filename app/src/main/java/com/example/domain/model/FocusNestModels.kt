@@ -103,6 +103,64 @@ enum class ReelsTargetApp(
   ),
 }
 
+enum class StartupPhase {
+  INITIALIZING,
+  FIRST_RUN,
+  ONBOARDING,
+  READY,
+  RECOVERY,
+}
+
+enum class VpnConnectionState(val label: String) {
+  DISCONNECTED("Disconnected"),
+  REQUESTING_PERMISSION("Awaiting Consent"),
+  CONNECTING("Starting"),
+  CONNECTED("Active"),
+  DISCONNECTING("Stopping"),
+  ERROR("Error"),
+}
+
+data class VpnDiagnostics(
+  val state: VpnConnectionState = VpnConnectionState.DISCONNECTED,
+  val statusMessage: String = "Local on-device DNS sinkhole inactive",
+  val lastError: String? = null,
+  val activeRuleCount: Int = 0,
+  val blocklistCount: Int = 0,
+  val allowlistCount: Int = 0,
+  val lastRuleSyncEpochMs: Long = 0L,
+  val packetsInspected: Long = 0L,
+  val blockedQueriesCount: Long = 0L,
+  val isPerAppScoped: Boolean = false,
+  val scopedPackageCount: Int = 0,
+  val privateDnsDisclosure: String =
+    "System Private DNS (DoT/DoH) or IPv6 DNS can bypass local IPv4 UDP DNS filtering on some networks.",
+)
+
+enum class WebsiteRuleOutcome(val label: String) {
+  ALLOWLISTED("Allowed (Explicit Allowlist)"),
+  BLOCKED("Blocked (NXDOMAIN Returned)"),
+  ALLOWED_NO_MATCH("Allowed (No Matching Rule)"),
+}
+
+data class WebsiteRuleEvaluation(
+  val rawQuery: String,
+  val normalizedDomain: String,
+  val outcome: WebsiteRuleOutcome,
+  val matchedRuleDomain: String? = null,
+  val matchedRuleCategory: String? = null,
+  val evaluatedRuleCount: Int = 0,
+)
+
+enum class AppPackageCategory(val label: String, val excludeFromDistractingByDefault: Boolean) {
+  USER_APP("User App", false),
+  LAUNCHER_HOME("Home Launcher", true),
+  SYSTEM_UI_INFRASTRUCTURE("System UI", true),
+  INPUT_METHOD("Keyboard / IME", true),
+  PERMISSION_CONTROLLER("Permissions", true),
+  SELF_APP("FocusNest", true),
+  SYSTEM_APP("System Utility", true),
+}
+
 data class PermissionSnapshot(
   val usageStatsGranted: Boolean = false,
   val accessibilityEnabled: Boolean = false,
@@ -115,6 +173,8 @@ data class PermissionSnapshot(
   val ignoringBatteryOptimizations: Boolean = false,
   val nfcSupported: Boolean = false,
   val nfcEnabled: Boolean = false,
+  val vpnState: VpnConnectionState = VpnConnectionState.DISCONNECTED,
+  val revokedPermissions: Set<String> = emptySet(),
 )
 
 data class ActiveBlockDecision(
@@ -201,10 +261,11 @@ object LaunchPauseCoordinator {
 }
 
 object UpdateReleaseConfig {
-  const val GITHUB_OWNER_REPO = "OWNER/FocusNest"
+  const val GITHUB_OWNER_REPO = "SudhirDevOps1/FocusNest"
+  const val DEVELOPER_NAME = "Sudhir Kumar"
   const val REPO_URL = "https://github.com/$GITHUB_OWNER_REPO"
   const val RELEASES_URL = "https://github.com/$GITHUB_OWNER_REPO/releases/latest"
-  const val PAGES_URL = "https://OWNER.github.io/FocusNest/"
+  const val PAGES_URL = "https://sudhirdevops1.github.io/FocusNest/"
 
   val latestHighlights =
     listOf(
@@ -212,6 +273,7 @@ object UpdateReleaseConfig {
       "Offline synthesized ambient focus soundscapes",
       "Mindful app-launch pause curtain with breathing delay",
       "Weekly printable/PDF wellbeing report card & bedtime checklist",
+      "Production-hardened onboarding state, CameraX scanner & local VPN diagnostics",
     )
 }
 

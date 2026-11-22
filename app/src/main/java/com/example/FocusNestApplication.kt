@@ -48,6 +48,7 @@ class AppContainer(context: Context) {
       installedAppDao = database.installedAppDao(),
       preferences = preferences,
       categoryLimitDao = database.categoryLimitDao(),
+      systemEnvironmentProvider = { usageStatsRepository.inspectSystemEnvironment() },
     )
 
   val focusRepository: FocusRepository =
