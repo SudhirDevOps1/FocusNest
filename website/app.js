@@ -571,3 +571,102 @@ document.querySelectorAll('.faq-q').forEach((btn) => {
     btn.querySelector('.faq-chevron').textContent = isOpen ? '−' : '+';
   });
 });
+
+// ==========================================================================
+// 8. 3D Interactive Phone Tilt (Parallax & Depth)
+// ==========================================================================
+const phoneMockup = document.querySelector('.phone-mockup');
+const phoneFrameEl = document.getElementById('phoneFrame');
+
+if (phoneMockup && phoneFrameEl) {
+  let isHoveringPhone = false;
+
+  phoneMockup.addEventListener('mouseenter', () => {
+    isHoveringPhone = true;
+  });
+
+  phoneMockup.addEventListener('mousemove', (e) => {
+    if (!isHoveringPhone) return;
+    const rect = phoneMockup.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateY = ((x - centerX) / centerX) * 9; // -9 to +9 deg
+    const rotateX = -((y - centerY) / centerY) * 9; // -9 to +9 deg
+
+    phoneFrameEl.style.transform = `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+  });
+
+  phoneMockup.addEventListener('mouseleave', () => {
+    isHoveringPhone = false;
+    phoneFrameEl.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+  });
+}
+
+// ==========================================================================
+// 9. Staggered Scroll-Reveal Animations (IntersectionObserver)
+// ==========================================================================
+const revealTargets = document.querySelectorAll(
+  '.card, .flow-node, .stat-card, .rule-card, .maintainer-card, .gallery-item, .faq-item, .table-wrap'
+);
+
+if ('IntersectionObserver' in window) {
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+  );
+
+  revealTargets.forEach((el, index) => {
+    el.classList.add('reveal-init');
+    // Stagger transition delay slightly within grids
+    const delay = (index % 4) * 0.08;
+    el.style.transitionDelay = `${delay}s`;
+    revealObserver.observe(el);
+  });
+}
+
+// ==========================================================================
+// 10. Offline Procedural Tactile Audio Feedback (Zero Network, Web Audio API)
+// ==========================================================================
+let audioCtx = null;
+function playTactileFeedback(freq = 600, duration = 0.04) {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    if (!audioCtx) audioCtx = new AudioContextClass();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(120, freq * 0.6), audioCtx.currentTime + duration);
+
+    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (_) {
+    // Graceful silent fallback
+  }
+}
+
+// Attach tactile feedback to interactive controls
+document.querySelectorAll('.btn, .phone-tab, .palette-btn, .theme-toggle-btn, .cat-chip').forEach((btn) => {
+  btn.addEventListener('click', () => playTactileFeedback(640, 0.035), { passive: true });
+});
+

@@ -446,3 +446,129 @@ code { background: var(--accent-soft); padding: 2px 7px; border-radius: 6px; col
   .nav-links.open { display: flex; }
   .flow-arrow { display: none; }
 }
+
+/* ==========================================================================
+   Premium Visual Enhancements, Keyframe Animations & Micro-Interactions
+   ========================================================================== */
+
+/* Ambient mesh background motion */
+@keyframes ambientMesh {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 0%; }
+}
+
+body {
+  background-size: 200% 200%;
+  animation: ambientMesh 24s ease infinite;
+}
+
+/* Floating badge keyframes */
+@keyframes floatSubtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.hero-pill, .banner-badge {
+  animation: floatSubtle 4s ease-in-out infinite;
+}
+
+/* Neon accent pulse */
+@keyframes pulseAccent {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft); }
+  50% { box-shadow: 0 0 24px 4px var(--accent-soft); }
+}
+
+.hero-cta .btn-primary, .phone-ring {
+  animation: pulseAccent 3.5s ease-in-out infinite;
+}
+
+/* 3D Interactive Phone Mockup Perspective */
+.phone-mockup {
+  perspective: 1200px;
+}
+
+.phone-frame {
+  transform-style: preserve-3d;
+  transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s ease;
+  will-change: transform;
+}
+
+.phone-frame:hover {
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.55), 0 0 36px var(--accent-soft);
+}
+
+/* Interactive Card Elevation & Glow Shimmer */
+.card, .flow-node, .stat-card, .rule-card, .maintainer-card, .gallery-item {
+  transition: transform 0.28s cubic-bezier(0.2, 0, 0, 1), border-color 0.28s ease, box-shadow 0.28s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover, .flow-node:hover, .stat-card:hover, .rule-card:hover, .gallery-item:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28), 0 0 20px var(--accent-soft);
+}
+
+/* Smooth Interactive Ripple Feedback on buttons */
+.btn, .phone-tab, .palette-btn, .theme-toggle-btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.16s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:active, .phone-tab:active, .palette-btn:active {
+  transform: scale(0.96);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 8px 24px var(--accent-soft);
+  filter: brightness(1.08);
+}
+
+/* Modal Spring Entrance */
+@keyframes modalSpringIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-backdrop:not([hidden]) .modal-card {
+  animation: modalSpringIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Staggered Scroll Reveal Utility */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-init.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Focus Curtain Breathing Orb enhanced animation */
+@keyframes breathingPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px var(--accent-soft);
+  }
+  50% {
+    transform: scale(1.18);
+    box-shadow: 0 0 45px var(--accent);
+  }
+}
+
+.curtain-orb.inhale {
+  animation: breathingPulse 4s ease-in-out infinite;
+}
+
