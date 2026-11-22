@@ -2,7 +2,7 @@
 
 - **Application ID**: `com.aistudio.focusnest.fnwbx`
 - **Namespace**: `com.example`
-- **Version**: `1.3.0` (`versionCode = 3`)
+- **Version**: `0.1.0-alpha.1` (`versionCode = 4`)
 - **Min SDK**: 26 (Android 8.0) | **Target / Compile SDK**: 36
 - **JDK**: **Java 17 or Java 21** (Robolectric suite targets Android SDK 34 for universal JDK 17 & 21 CI compatibility)
 
