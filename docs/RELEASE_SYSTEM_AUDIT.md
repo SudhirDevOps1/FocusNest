@@ -36,3 +36,12 @@ Before performing any tag cleanup or version reset, a complete immutable record 
    - `BUILD.md`
    - `README.md`
    - `website/index.html`
+
+---
+
+## 4. Safe Release Cleanup & Backup Verification
+Following the Section 10.2 protocol, obsolete release `v1.3.0` was formally inventoried and backed up before removal:
+- **Backup File**: `docs/releases-backup/v1.3.0.json` (SHA-256 digests, asset download URLs, release body).
+- **Cleanup Action**: Executed `gh release delete v1.3.0 --cleanup-tag -y`.
+- **Verification**: Confirmed `gh release list` and `git ls-remote --tags origin` report 0 releases and 0 tags.
+- **Next Release Target**: `v0.1.0-alpha.1` with `versionCode: 4`.
