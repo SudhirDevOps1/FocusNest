@@ -17,11 +17,13 @@ gradle :app:lintDebug
 # Build Debug APK
 gradle :app:assembleDebug
 
-# Build Release APK & App Bundle (unsigned or signed via KEYSTORE_PATH env vars)
+# Build Release APK & App Bundle (signed via KEYSTORE_PATH env vars, or unsigned in CI without secrets)
 gradle :app:assembleRelease :app:bundleRelease
 ```
 
 ## Public CI/CD Pipelines (`.github/workflows/`)
-- `android-ci.yml` — Runs unit/Robolectric tests, Android Lint, Zero-`INTERNET` manifest privacy check, Debug/Release APK & AAB builds on every PR and push.
-- `release.yml` — Triggered on `v*` tags; runs verification, signs APK/AAB if `RELEASE_KEYSTORE_BASE64` secret is configured, generates `SHA256SUMS.txt`, and creates a GitHub Release.
-- `deploy-pages.yml` — Publishes `/website` to GitHub Pages cleanly with zero external CDNs.
+- `android-ci.yml` — Runs Zero-`INTERNET` manifest privacy gate, unit/Robolectric tests (`31` tests), Android Lint, and Debug + unsigned/signed Release APK/AAB verification on every PR and push.
+- `website-ci.yml` — Validates `/website` HTML/JS/assets/links on PRs and deploys `/website` to GitHub Pages cleanly on `main` (zero external CDNs).
+- `release-please.yml` — Automates Conventional Commit changelogs, `versionName`/`versionCode` bumps, and release PRs (`release-please-config.json`).
+- `android-release.yml` — Triggered on `v*` tags; runs verification, signs APK/AAB if `RELEASE_KEYSTORE_BASE64` secret is configured (or packages `FocusNest-<tag>-release-unsigned.apk` + debug APK when unset), generates `SHA256SUMS.txt`, and publishes a GitHub Release.
+- `codeql.yml`, `dependency-review.yml`, & `docs-check.yml` — Run static code scanning, dependency vulnerability/license checks, and documentation/icon/link integrity checks on PRs.

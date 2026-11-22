@@ -3,7 +3,7 @@
 FocusNest is offline-first, omits `android.permission.INTERNET`, and collects zero user data.
 
 ## Reporting a Vulnerability
-Please report security issues responsibly via the GitHub Security Advisories tab on `OWNER/FocusNest` without publishing exploit details before a fix is released.
+Please report security issues responsibly via the GitHub Security Advisories tab on `SudhirDevOps1/FocusNest` without publishing exploit details before a fix is released.
 
 ## Security & Supply-Chain Guarantees
 - Standard cryptography only (`javax.crypto` AES-256-GCM + `PBKDF2WithHmacSHA256`, Android Keystore, SHA-256).

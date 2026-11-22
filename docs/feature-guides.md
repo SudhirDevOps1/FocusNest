@@ -21,4 +21,4 @@
 
 ## Report Cards, Updates & Encrypted Backup
 - Export **Printable/PDF Weekly Wellbeing Report Cards**, CSV/JSON analytics, or AES-256-GCM passphrase-encrypted backups anytime.
-- Check for newer releases offline-safely via **More > Settings > Check Releases on GitHub**, which opens `https://github.com/OWNER/FocusNest/releases/latest` in your browser.
+- Check for newer releases offline-safely via **More > Settings > Check Releases on GitHub**, which opens `https://github.com/SudhirDevOps1/FocusNest/releases/latest` in your browser.
