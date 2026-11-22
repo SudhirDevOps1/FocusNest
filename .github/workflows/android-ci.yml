@@ -1,0 +1,92 @@
+name: FocusNest Android CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: android-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  privacy-and-quality:
+    name: Privacy Gate, Unit Tests & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Zero-Internet Manifest Privacy Gate
+        run: |
+          if grep -q "android.permission.INTERNET" app/src/main/AndroidManifest.xml; then
+            echo "::error::PRIVACY VIOLATION: android.permission.INTERNET found in AndroidManifest.xml"
+            exit 1
+          fi
+          echo "Verified: Zero INTERNET permission in AndroidManifest.xml"
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.3.1"
+
+      - name: Run Unit & Robolectric Tests + Android Lint
+        run: gradle :app:testDebugUnitTest :app:lintDebug --stacktrace
+
+      - name: Upload Test & Lint Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          if-no-files-found: ignore
+          path: |
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/reports/lint-results-debug.html
+            app/build/reports/lint-results-debug.xml
+
+  build-artifacts:
+    name: Build APK & App Bundle
+    needs: privacy-and-quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.3.1"
+
+      - name: Assemble Debug & Release APK + AAB
+        run: gradle :app:assembleDebug :app:assembleRelease :app:bundleRelease --stacktrace
+
+      - name: Package Build Artifacts & Checksums
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/*.apk dist/ || true
+          cp app/build/outputs/apk/release/*.apk dist/ || true
+          cp app/build/outputs/bundle/release/*.aab dist/ || true
+          (cd dist && sha256sum * > SHA256SUMS.txt)
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: focusnest-android-artifacts
+          path: dist/

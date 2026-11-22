@@ -1,0 +1,1436 @@
+MASTER BUILD PROMPT — FOCUSNEST
+Build a Complete, Production-Quality, Free & Open-Source Android Digital Wellbeing Application
+
+You are an expert Android development team consisting of:
+
+Senior Kotlin Android Architect
+Jetpack Compose UI/UX Designer
+Android Framework and System API Engineer
+Digital Wellbeing and App Blocking Specialist
+Database and Security Engineer
+QA Automation Engineer
+Open-Source Maintainer
+Technical Documentation Writer
+Brand Identity and Graphic Designer
+
+Your task is to independently design, architect, implement, test, document and deliver a complete native Android application called FocusNest.
+
+Do not produce a tutorial, static mockup, incomplete prototype, or collection of disconnected screens.
+
+Build a real, fully functional, polished Android application from scratch.
+
+1. PRODUCT IDENTITY
+
+Application name: FocusNest
+
+Tagline: Own Your Time. Protect Your Focus.
+
+Application category:
+
+Digital Wellbeing
+Screen Time Management
+App Blocking
+Productivity
+Focus Timer
+Habit Tracking
+
+Product philosophy:
+
+FocusNest combines the most useful capabilities found across digital wellbeing and focus applications into one independently developed application.
+
+Use other applications as functional inspiration only. Do not copy their source code, branding, proprietary assets, UI layouts, or copyrighted content.
+
+The application must be:
+
+100% free for all users.
+Open source.
+Privacy-first.
+Offline-first.
+Free from advertisements.
+Free from subscriptions.
+Free from artificial feature restrictions.
+Free from mandatory registration.
+Functional without an internet connection.
+Designed for long-term maintainability.
+
+Every feature developed for FocusNest must be available without payment.
+
+Do not implement fake premium screens, subscription upsells, locked features, advertisements, tracking SDKs, or unnecessary analytics.
+
+2. TECHNOLOGY STACK
+
+Build a native Android application.
+
+Required technologies:
+
+Programming language: Kotlin.
+UI framework: Jetpack Compose.
+Design system: Material 3.
+Architecture: Clean Architecture with MVVM.
+Database: Room.
+Lightweight preferences: DataStore.
+Background scheduling: WorkManager.
+Dependency injection: Hilt, if compatible with the generated project.
+Asynchronous operations: Kotlin Coroutines and Flow.
+Navigation: Navigation Compose.
+Charts: Compose-compatible charting implementation.
+QR scanning: CameraX and an actively maintained barcode scanning library.
+NFC: Android NFC APIs.
+Widgets: Glance AppWidget.
+Local encryption: Android Keystore with appropriate cryptographic libraries.
+Testing: JUnit, MockK, Compose UI Testing and Android instrumentation tests.
+
+Use current stable, mutually compatible dependencies.
+
+Before adding dependencies:
+
+Verify maintenance status.
+Check licenses.
+Avoid abandoned libraries.
+Avoid unnecessary dependencies.
+Prefer AndroidX and official Android libraries.
+
+Use Gradle Kotlin DSL.
+
+Generate:
+
+settings.gradle.kts
+build.gradle.kts
+app/build.gradle.kts
+gradle/libs.versions.toml where appropriate
+AndroidManifest.xml
+ProGuard/R8 configuration
+Complete Kotlin source files
+Resources
+Tests
+Documentation
+
+Use the latest stable Android SDK and dependency versions supported by the build environment. Do not invent SDK or library versions.
+
+Set minSdk to Android 8.0 (API 26), unless a verified dependency or feature requires a different minimum.
+
+Use a current compileSdk and targetSdk suitable for Google Play compatibility.
+
+Suggested package name: com.focusnest.app
+
+Make the package name easy to change.
+
+3. APPLICATION ARCHITECTURE
+
+Use a maintainable architecture.
+
+Organize source code by features and shared infrastructure.
+
+Suggested package structure:
+
+com.focusnest.app
+
+core
+common
+designsystem
+navigation
+database
+datastore
+security
+permissions
+notifications
+utils
+data
+local
+repository
+backup
+domain
+model
+repository
+usecase
+feature
+onboarding
+dashboard
+focus
+blocker
+appselection
+schedules
+challenges
+usage
+insights
+habits
+bedtime
+notifications
+websiteblocking
+settings
+about
+service
+UsageMonitoringService
+AppBlockingService
+WebsiteFilterService
+NfcUnlockHandler
+NotificationAccessService
+widget
+receiver
+
+Use:
+
+Repository pattern.
+Dependency injection.
+Immutable UI state.
+ViewModels.
+StateFlow.
+Proper error handling.
+Lifecycle-aware collection.
+Single source of truth for application data.
+
+Keep business logic outside Composable functions.
+
+Do not place database operations, blocking logic, or permission handling directly inside UI components.
+
+Every major feature should have its own ViewModel, domain logic, repository and tests where appropriate.
+
+Avoid creating one enormous Kotlin file.
+
+4. BRANDING AND GRAPHIC DESIGN
+
+Create an original, professional brand identity for FocusNest.
+
+Brand personality:
+
+Calm.
+Minimal.
+Premium.
+Friendly.
+Trustworthy.
+Modern.
+Focus-oriented.
+
+Create an original application icon.
+
+Icon concept: A minimalist geometric nest combined with a focus target or circular protection symbol.
+
+Use a distinctive blue, indigo and violet color identity.
+
+Do not use an existing application's logo.
+
+Create:
+
+Adaptive launcher icon.
+Foreground icon.
+Background icon.
+Monochrome launcher icon.
+Splash screen.
+App logo in SVG or vector-compatible format.
+Light theme logo.
+Dark theme logo.
+Favicon.
+README branding assets.
+Website branding assets.
+
+Suggested colors:
+
+Primary: #6558E8 Secondary: #8B7CF6 Accent: #56C8C2 Background Light: #F7F7FC Background Dark: #10111A Surface Light: #FFFFFF Surface Dark: #1B1C28
+
+Use a consistent design token system.
+
+Support:
+
+Light mode.
+Dark mode.
+Follow system theme.
+Dynamic colors where appropriate.
+Custom accent colors.
+
+Use excellent typography, spacing, subtle gradients, rounded cards, meaningful icons and smooth animations.
+
+Avoid excessive gradients, unnecessary borders, cluttered layouts and oversized cards.
+
+The interface should look like a professionally designed, modern Android productivity application.
+
+5. ONBOARDING EXPERIENCE
+
+Create a polished first-launch onboarding experience.
+
+Screens:
+
+Welcome to FocusNest.
+Reclaim your time.
+Understand screen-time tracking.
+Configure your first focus goal.
+Select distracting applications.
+Explain usage-access permission.
+Explain accessibility permission if required.
+Explain notification permission.
+Explain optional DND access.
+Explain optional NFC access.
+Complete setup.
+
+Important:
+
+Never silently request sensitive permissions.
+
+For every permission:
+
+Explain its purpose.
+Explain why it is required.
+Explain how the feature works without it.
+Provide an explicit enable button.
+Show current permission status.
+Handle permission denial gracefully.
+
+Allow users to skip optional permissions.
+
+Do not make onboarding artificially difficult.
+
+6. HOME DASHBOARD
+
+Create an attractive dashboard containing:
+
+A. Greeting section
+
+Good morning / afternoon / evening.
+Current date.
+Personal daily focus goal.
+
+B. Screen-time summary
+
+Today's total screen time.
+Yesterday comparison.
+Daily goal progress.
+Remaining screen-time allowance.
+
+C. Focus summary
+
+Current active session.
+Time remaining.
+Start Focus button.
+Pause and resume controls.
+
+D. Most-used applications
+
+App icons.
+Application names.
+Usage duration.
+Percentage of total usage.
+Configured daily limits.
+
+E. Quick actions
+
+Start focus.
+Block distracting apps.
+Enable bedtime mode.
+View insights.
+Create schedule.
+
+F. Daily progress
+
+Focus minutes.
+Number of completed sessions.
+Pickups, where reliably available.
+Goal completion percentage.
+
+G. Motivational section
+
+Original motivational messages.
+Daily achievements.
+Focus streak.
+
+Everything must be connected to real application state and stored data.
+
+Never display fabricated usage statistics.
+
+Show empty states when permission is unavailable or data is missing.
+
+7. APP USAGE TRACKING
+
+Implement real Android application usage monitoring.
+
+Use Android UsageStatsManager.
+
+Requirements:
+
+Daily usage.
+Weekly usage.
+Monthly usage.
+Per-application usage.
+Foreground activity statistics.
+Usage history.
+Daily app ranking.
+Time-based usage charts.
+Most distracting applications.
+First and last usage time when available.
+Daily comparisons.
+Usage goals.
+
+Implement proper time calculations.
+
+Handle:
+
+Time zones.
+Daylight-saving changes.
+Midnight transitions.
+Device restarts.
+Permission revocation.
+Missing usage records.
+
+Use efficient queries.
+
+Do not poll continuously without justification.
+
+Document the limitations of Android usage reporting.
+
+Do not claim to measure exact physical screen time if the platform data does not establish it.
+
+8. APP BLOCKER
+
+This is one of the most important modules.
+
+Implement a functional application restriction system.
+
+Features:
+
+Select installed applications.
+Search applications.
+Select multiple applications.
+Categorize applications.
+Create custom app groups.
+Block selected applications.
+Set daily usage limits.
+Configure temporary blocking.
+Create recurring schedules.
+Create focus-specific restrictions.
+Whitelist essential applications.
+Configure emergency access.
+Configure unlock cooldowns.
+Create custom blocking profiles.
+
+Blocking profiles:
+
+Deep Work.
+Study.
+Reading.
+Sleep.
+Exercise.
+Custom.
+
+Each profile should have independent settings.
+
+Blocking implementation:
+
+Investigate supported Android APIs and choose the most reliable permitted mechanism.
+
+Use AccessibilityService only where necessary, with transparent user consent and a narrowly scoped implementation.
+
+If an accessibility-based foreground app detection method is used:
+
+Detect only the information necessary for the blocking feature.
+Do not collect typed text.
+Do not capture passwords.
+Do not capture screen contents unnecessarily.
+Do not transmit accessibility events to external servers.
+Explain the service in settings.
+
+Use a dedicated blocking overlay or blocking activity.
+
+When a blocked application is opened:
+
+Show FocusNest's blocking screen.
+Display the reason for blocking.
+Display the active session or remaining restriction time.
+Provide configured unlock options.
+Provide emergency access when enabled.
+
+Important Android limitation:
+
+Ordinary third-party applications cannot universally force-stop or disable other applications like privileged system software or device-owner applications.
+
+Do not pretend that FocusNest has unrestricted system-level control.
+
+If the user revokes required access, show that blocking protection is inactive.
+
+Never silently bypass system security.
+
+9. DAILY APP LIMITS
+
+Implement:
+
+Per-app daily limit.
+Per-category limit.
+Combined app-group limit.
+Custom daily goals.
+Warning at 80%.
+Warning at 90%.
+Warning at 100%.
+Optional grace period.
+Optional cooldown.
+Daily reset.
+Limit history.
+
+Provide an intuitive configuration interface.
+
+Example:
+
+Instagram: 30 minutes. YouTube: 45 minutes. Entertainment: 90 minutes.
+
+Show remaining time accurately based on recorded usage.
+
+10. FOCUS TIMER AND POMODORO
+
+Create a complete focus timer.
+
+Presets:
+
+15 minutes.
+25 minutes.
+45 minutes.
+60 minutes.
+90 minutes.
+Custom duration.
+
+Pomodoro:
+
+Focus period.
+Short break.
+Long break.
+Custom intervals.
+Automatic cycle management.
+Session counter.
+Daily session goal.
+
+Timer functionality:
+
+Start.
+Pause.
+Resume.
+Stop.
+Restart.
+Skip break.
+Extend session.
+Background persistence.
+Notification controls.
+Sound and vibration options.
+
+Use a monotonic time source to avoid clock changes affecting timer accuracy.
+
+Persist enough state to recover correctly after process death or device restart.
+
+Support:
+
+Study sessions.
+Work sessions.
+Creative sessions.
+Reading sessions.
+Custom sessions.
+
+Each completed session must be saved locally.
+
+11. SMART UNLOCK SYSTEM
+
+Build a flexible unlock challenge engine.
+
+Unlock methods:
+
+A. QR code
+
+Generate a unique challenge QR.
+Scan an authorized QR.
+Configure one-time or reusable codes.
+Support expiration.
+Prevent simple replay where possible.
+
+B. NFC
+
+Read supported NFC tags.
+Register user-owned tags.
+Associate a tag with a profile.
+Configure tap-to-unlock.
+Support tag removal and reassignment.
+
+C. Barcode
+
+Scan supported barcode formats.
+Configure allowed codes.
+Associate codes with unlock profiles.
+
+D. Mathematics challenge
+
+Addition.
+Subtraction.
+Multiplication.
+Division.
+Adaptive difficulty.
+Configurable question count.
+Configurable time limit.
+Randomized questions.
+
+E. Typing challenge
+
+Display an original sentence.
+Require accurate typing.
+Configure difficulty.
+Check completion.
+
+F. Breathing challenge
+
+Guided breathing exercise.
+Configurable duration.
+
+G. Intent-based unlock
+
+Ask why the user wants to open the blocked app.
+Offer predefined reasons.
+Optionally require a short written intention.
+Record the choice locally.
+
+Every unlock method must be configurable.
+
+Do not make the application impossible to exit.
+
+Provide an emergency recovery mechanism.
+
+Do not treat a QR code or NFC UID as cryptographically secure identity proof. Use signed challenge tokens or other appropriate verification where feasible.
+
+12. REELS AND SHORT-FORM CONTENT CONTROL
+
+Create an optional short-form content control module.
+
+Targets may include:
+
+Instagram Reels.
+YouTube Shorts.
+Facebook Reels.
+Other supported applications.
+
+Possible implementation:
+
+Use carefully scoped accessibility-based UI inspection only when necessary and permitted.
+
+Use configurable detection rules rather than assuming all applications have identical layouts.
+
+Allow:
+
+Blocking selected content surfaces.
+Configurable cooldown.
+Short-form content reminders.
+Custom warning messages.
+Temporary override.
+
+Important:
+
+Do not claim reliable universal Reels/Shorts blocking.
+
+Third-party application interfaces change frequently.
+
+Implement a graceful fallback when detection is unsupported.
+
+Never intercept or manipulate private communications.
+
+13. WEBSITE BLOCKING
+
+Implement an optional website filtering module.
+
+Provide:
+
+Domain blocking.
+Allowlist.
+Blocklist.
+Custom schedules.
+Temporary access.
+Focus-profile integration.
+Local rules.
+Import/export domain lists.
+
+Investigate Android VpnService for local device-level filtering.
+
+If using VpnService:
+
+Clearly explain the VPN permission.
+Operate locally.
+Never route traffic to a remote proxy unnecessarily.
+Do not collect browsing histories.
+Do not perform TLS interception.
+Handle DNS safely.
+Support VPN lifecycle changes.
+Explain compatibility with other VPN applications.
+
+Allow the user to disable the filtering service at any time.
+
+Provide a clear explanation of limitations involving encrypted DNS, browser-specific behaviour and VPN conflicts.
+
+14. INTERNET ACCESS CONTROL PER APPLICATION
+
+Investigate whether per-app network restrictions can be implemented using an Android VpnService-based local filtering mechanism.
+
+Requirements:
+
+User-selected applications.
+Per-app network policy.
+Domain-based policies where supported.
+Allowlist.
+Blocklist.
+Clear connection status.
+User-controlled activation.
+
+Do not claim Android can natively toggle another application's network permission through ordinary third-party APIs.
+
+Do not require root.
+
+If a capability cannot be implemented reliably without root or privileged access, explain this clearly and provide a supported alternative.
+
+15. BEDTIME AND DIGITAL WELLBEING
+
+Implement:
+
+Bedtime schedule.
+Night mode.
+Wind-down reminders.
+Sleep preparation timer.
+Selected app restrictions.
+Optional grayscale shortcut.
+Optional DND integration.
+Wake-up schedule.
+Repeat weekdays.
+Weekend configuration.
+
+DND must use Android's permitted notification policy access.
+
+Grayscale should use supported system settings or clearly labelled manual instructions when direct control is unavailable.
+
+Do not pretend that an ordinary app can control every system setting.
+
+16. NOTIFICATION MANAGEMENT
+
+Implement optional notification-management features.
+
+Use NotificationListenerService only with explicit consent.
+
+Features:
+
+Notification history.
+Application-wise notification counts.
+Daily notification summary.
+Notification distraction analytics.
+Quiet-hour reminders.
+Optional app-specific notification insights.
+
+Privacy requirements:
+
+Keep notification content local.
+Do not store sensitive notification text by default.
+Offer metadata-only mode.
+Allow clearing stored records.
+Never transmit notification content.
+
+Do not claim to disable notifications for arbitrary applications without supported permissions or system controls.
+
+17. ANALYTICS AND INSIGHTS
+
+Create a visually excellent analytics dashboard.
+
+Sections:
+
+Daily:
+
+Total app usage.
+App-wise breakdown.
+Focus minutes.
+Session count.
+Daily goals.
+Usage timeline.
+
+Weekly:
+
+Seven-day chart.
+Daily averages.
+Most-used apps.
+Focus trends.
+Improvement comparison.
+
+Monthly:
+
+Monthly screen-time trend.
+Habit progress.
+Focus consistency.
+Usage distribution.
+Monthly achievements.
+
+Additional:
+
+App categories.
+App-group statistics.
+Pickup statistics if available.
+Notification statistics.
+Focus streak.
+Best focus day.
+Longest focus session.
+
+Charts must be real, accurate and accessible.
+
+Add date-range filters.
+
+Support CSV and JSON exports.
+
+Never invent analytics data.
+
+18. HABITS AND STREAKS
+
+Build a simple habit-tracking module.
+
+Features:
+
+Create custom habits.
+Daily targets.
+Weekly targets.
+Completion tracking.
+Streak tracking.
+Calendar view.
+Habit reminders.
+Habit history.
+Progress charts.
+
+Example habits:
+
+Read for 30 minutes.
+Study for 2 hours.
+Avoid social media.
+Sleep on time.
+Complete 4 focus sessions.
+
+Keep habit tracking independent from app blocking.
+
+19. INVINCIBLE MODE / STRICT FOCUS MODE
+
+Create a strict focus mode.
+
+Features:
+
+Configurable minimum session duration.
+Restricted unlock methods.
+Optional cooldown.
+Confirmation before activation.
+Emergency override.
+Visible active-session status.
+
+Do not claim the mode is impossible to bypass.
+
+Ordinary Android applications cannot prevent users from uninstalling or force-stopping them under all conditions.
+
+Do not create device-admin traps, hidden controls, deceptive permission requests, or mechanisms that lock users out of their own devices.
+
+Explain the limitations honestly.
+
+20. WIDGETS AND QUICK SETTINGS
+
+Implement Android home-screen widgets using Glance.
+
+Widget designs:
+
+Today's screen time.
+Focus timer.
+Start focus.
+Current blocking profile.
+Daily progress.
+Remaining app limit.
+
+Add a Quick Settings Tile where appropriate.
+
+Widgets must:
+
+Use actual stored data.
+Update reliably.
+Support light and dark themes.
+Handle unavailable permissions.
+Avoid unnecessary battery usage.
+21. DATABASE DESIGN
+
+Use Room with proper entities, DAOs and migrations.
+
+Suggested entities:
+
+AppUsageEntity
+InstalledAppEntity
+AppLimitEntity
+AppGroupEntity
+FocusSessionEntity
+FocusProfileEntity
+BlockRuleEntity
+BlockingScheduleEntity
+UnlockChallengeEntity
+UnlockHistoryEntity
+HabitEntity
+HabitCompletionEntity
+DailyGoalEntity
+NotificationUsageEntity
+BedtimeScheduleEntity
+UserPreferenceEntity
+
+Requirements:
+
+Appropriate primary keys.
+Foreign keys.
+Indices.
+Transactions.
+Migration tests.
+Database versioning.
+Backup and restore.
+
+Avoid destructive migrations in production.
+
+Store only information necessary for the requested features.
+
+Use DataStore for lightweight configuration.
+
+22. BACKUP AND RESTORE
+
+Implement local backup.
+
+Features:
+
+Export settings.
+Export focus history.
+Export app limits.
+Export habits.
+Export schedules.
+Restore from backup.
+Backup validation.
+Version compatibility.
+
+Support JSON and CSV where appropriate.
+
+Allow optional encrypted backup files.
+
+Use Android's Storage Access Framework.
+
+Do not require a cloud account.
+
+Optional encrypted device sync may be considered a future module, not a dependency for core functionality.
+
+23. SECURITY AND PRIVACY
+
+Privacy is a central product feature.
+
+Requirements:
+
+No advertisements.
+No tracking SDK.
+No unnecessary network permission.
+No mandatory account.
+No hidden analytics.
+No unnecessary collection of installed-app data.
+Local-first storage.
+Encryption for sensitive backup data.
+Secure random token generation.
+Safe exported components.
+Explicit permission explanations.
+Secure handling of NFC and QR challenges.
+No hardcoded credentials.
+No secrets in source control.
+
+Provide a privacy settings screen.
+
+Allow users to:
+
+View stored data categories.
+Delete usage history.
+Delete notification history.
+Delete habits.
+Reset application data.
+Export personal data.
+Disable optional services.
+
+Default all optional network-dependent functionality to disabled.
+
+24. ACCESSIBILITY AND INTERNATIONALIZATION
+
+Support:
+
+English.
+Hindi.
+Extensible language resources.
+
+Accessibility:
+
+TalkBack.
+Semantic descriptions.
+Adequate contrast.
+Scalable text.
+Minimum touch target sizes.
+Keyboard navigation where relevant.
+Reduced motion preference.
+Clear error messages.
+
+Avoid hardcoding user-visible text in Kotlin files.
+
+Use Android string resources.
+
+25. SETTINGS
+
+Create comprehensive settings.
+
+Categories:
+
+Appearance:
+
+Light.
+Dark.
+System default.
+Accent color.
+Font preferences.
+
+Focus:
+
+Default duration.
+Break duration.
+Sounds.
+Vibration.
+Auto-start preferences.
+
+Blocking:
+
+Default blocking screen.
+Emergency override.
+Unlock challenges.
+Cooldowns.
+Whitelist.
+
+Permissions:
+
+Usage access.
+Accessibility.
+Notifications.
+DND.
+Camera.
+NFC.
+
+Data:
+
+Export.
+Import.
+Backup.
+Restore.
+Clear history.
+
+Privacy:
+
+Data transparency.
+Data deletion.
+Local storage information.
+
+About:
+
+App version.
+Open-source license.
+Credits.
+Documentation.
+Privacy policy.
+GitHub repository link placeholder.
+26. DESIGN ALL APPLICATION SCREENS
+
+Create complete, consistent screens for:
+
+Splash.
+Onboarding.
+Dashboard.
+Focus timer.
+Focus presets.
+Active focus session.
+Break screen.
+App selection.
+App details.
+App limits.
+App groups.
+Blocking profiles.
+Blocking schedule.
+Blocking overlay.
+Unlock challenges.
+QR scanner.
+NFC setup.
+Website blocker.
+Internet controls.
+Bedtime mode.
+Notification insights.
+Daily analytics.
+Weekly analytics.
+Monthly analytics.
+Habit tracker.
+Habit details.
+Widgets configuration.
+Permission center.
+Backup and restore.
+Settings.
+About.
+Privacy.
+Empty states.
+Error states.
+Permission-denied states.
+
+Every screen must be connected to actual navigation and application logic.
+
+Use reusable components.
+
+Implement loading, empty, error, success and permission-unavailable states.
+
+Use realistic sample content only in preview and demo environments. Never mix demonstration data with real user analytics.
+
+27. LOGO, ICON AND ASSET GENERATION
+
+Generate original graphic assets for FocusNest.
+
+Required deliverables:
+
+Primary logo.
+Compact logo.
+Launcher icon.
+Adaptive foreground.
+Adaptive background.
+Monochrome icon.
+Splash illustration.
+Onboarding illustrations.
+Empty-state illustrations.
+Blocking-screen illustration.
+Focus-session illustration.
+README banner.
+Website favicon.
+
+Use vector assets wherever possible.
+
+Create the graphics as actual project resources.
+
+Do not simply describe the assets or leave TODO placeholders.
+
+Do not use copyrighted third-party application artwork.
+
+28. DOCUMENTATION AND OPEN-SOURCE REPOSITORY
+
+Generate a professional open-source repository.
+
+Required files:
+
+README.md LICENSE CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md PRIVACY.md CHANGELOG.md ROADMAP.md ARCHITECTURE.md FEATURES.md PERMISSIONS.md BUILDING.md TESTING.md FAQ.md
+
+Also generate:
+
+docs/INSTALLATION.md
+docs/APP_BLOCKING.md
+docs/USAGE_TRACKING.md
+docs/WEBSITE_FILTERING.md
+docs/NFC_UNLOCK.md
+docs/QR_UNLOCK.md
+docs/DATABASE.md
+docs/PRIVACY_MODEL.md
+docs/ANDROID_LIMITATIONS.md
+docs/RELEASE_PROCESS.md
+docs/SCREENSHOTS.md
+
+README must include:
+
+Project overview.
+Logo.
+Screenshots section.
+Feature list.
+Installation instructions.
+Build instructions.
+Permission explanations.
+Privacy philosophy.
+Architecture.
+Technology stack.
+Roadmap.
+Contribution instructions.
+License.
+Frequently asked questions.
+
+Do not invent a GitHub repository URL, contributor names, release versions, badges or actual build results.
+
+Use clearly marked placeholders for information that does not exist yet.
+
+Choose a permissive open-source license such as Apache-2.0 or MIT, and explain the implications before finalizing the license. Do not copy third-party code without license compatibility review.
+
+29. OPTIONAL SHOWCASE WEBSITE
+
+Create a separate, professional project website as a later deliverable.
+
+Brand: FocusNest.
+
+Website pages:
+
+Home.
+Features.
+Screenshots.
+Privacy.
+Documentation.
+Installation.
+FAQ.
+GitHub.
+Changelog.
+Roadmap.
+
+Design:
+
+Modern landing page.
+Hero section.
+Original product illustration.
+App screenshots.
+Feature cards.
+Privacy-first section.
+Feature comparison.
+Installation instructions.
+Open-source CTA.
+Responsive mobile design.
+
+Use original assets.
+
+Do not advertise capabilities that are not implemented.
+
+The website must be a separate project from the native Android application unless the environment explicitly supports a separate website deliverable.
+
+Do not let website development interfere with the Android app.
+
+30. TESTING REQUIREMENTS
+
+Write meaningful automated tests.
+
+Unit tests:
+
+Usage calculations.
+Daily limits.
+Time-zone handling.
+Focus timer.
+Pomodoro cycles.
+Unlock challenge logic.
+QR validation.
+NFC rule validation.
+Habit streaks.
+Schedule evaluation.
+Backup validation.
+
+Database tests:
+
+Insert.
+Update.
+Delete.
+Query.
+Migration.
+Relationships.
+
+UI tests:
+
+Onboarding.
+Dashboard.
+Navigation.
+Focus session.
+App selection.
+Settings.
+Blocking screen.
+Permission states.
+
+Integration tests:
+
+Room repository.
+Usage statistics integration.
+WorkManager tasks.
+Service lifecycle.
+Backup and restore.
+
+Test:
+
+Android API 26 minimum.
+Current target SDK.
+Different screen sizes.
+Light and dark themes.
+Process recreation.
+Device restart recovery.
+Permission revocation.
+Offline usage.
+Empty database.
+Large usage history.
+
+Do not claim a test passed unless it was actually executed.
+
+31. PERFORMANCE AND BATTERY
+
+Optimize for ordinary Android phones.
+
+Requirements:
+
+Avoid excessive background services.
+Avoid continuous polling.
+Use WorkManager for deferrable background work.
+Use event-driven updates where possible.
+Minimize database queries.
+Paginate large datasets.
+Cache appropriate data.
+Avoid unnecessary recompositions.
+Keep animations smooth.
+Avoid main-thread database operations.
+Handle process death.
+Handle Doze and battery restrictions.
+
+Explain OEM-specific background limitations.
+
+32. IMPLEMENTATION PRIORITIES
+
+Build the project in phases.
+
+PHASE 1 — FOUNDATION
+
+Gradle project.
+App structure.
+Material 3 theme.
+Navigation.
+Room.
+DataStore.
+Onboarding.
+Branding.
+
+PHASE 2 — CORE FUNCTIONALITY
+
+Usage tracking.
+Dashboard.
+App selection.
+Daily limits.
+Focus timer.
+Pomodoro.
+Blocking profiles.
+
+PHASE 3 — ADVANCED BLOCKING
+
+Accessibility-based blocking where appropriate.
+Blocking screen.
+Scheduling.
+Unlock challenges.
+QR.
+NFC.
+Whitelist.
+Emergency access.
+
+PHASE 4 — DIGITAL WELLBEING
+
+Analytics.
+Habits.
+Bedtime.
+Notifications.
+Website filtering.
+Supported network controls.
+
+PHASE 5 — POLISH
+
+Widgets.
+Quick Settings Tile.
+Backup.
+Restore.
+Customization.
+Animations.
+Accessibility.
+Hindi localization.
+
+PHASE 6 — DELIVERY
+
+Automated tests.
+Bug fixes.
+Documentation.
+License.
+Branding assets.
+Release configuration.
+Final build verification.
+
+Prioritize a working core application over partially implemented advanced features.
+
+33. STRICT DEVELOPMENT RULES
+
+These rules are mandatory.
+
+Do not generate a static UI-only application.
+Do not use fake app-blocking functionality.
+Do not leave major buttons non-functional.
+Do not use fake analytics.
+Do not create mock permissions.
+Do not simulate successful service activation.
+Do not silently ignore errors.
+Do not put all code in MainActivity.kt.
+Do not hardcode user data.
+Do not invent Android APIs.
+Do not use deprecated APIs when supported alternatives exist.
+Do not use root access.
+Do not implement hidden surveillance.
+Do not bypass Android permission requirements.
+Do not create deceptive accessibility services.
+Do not claim unrestricted control over other applications.
+Do not require Firebase for core features.
+Do not introduce mandatory sign-in.
+Do not introduce paid feature restrictions.
+Do not omit documentation.
+Do not omit tests.
+Do not use proprietary assets.
+Do not include API keys in the APK.
+Do not silently replace working features with mock implementations during subsequent updates.
+
+If a feature cannot be implemented because of Android restrictions, dependency limitations or AI Studio limitations:
+
+Explain the reason.
+Identify the relevant Android API.
+Implement the closest legitimate alternative.
+Document the limitation.
+Mark the feature as partially supported.
+Never claim that it works when it does not.
+34. DEFINITION OF DONE
+
+The application is not complete simply because the emulator displays the dashboard.
+
+Completion requires:
+
+[ ] Project builds successfully. [ ] App installs successfully. [ ] App launches without crashing. [ ] Navigation works. [ ] Database persists across restarts. [ ] Onboarding works. [ ] Usage monitoring works with permission. [ ] Dashboard uses real data. [ ] Focus timer works. [ ] Pomodoro works. [ ] App limits work. [ ] Blocking works using its documented supported mechanism. [ ] Blocking schedules work. [ ] Unlock challenges work. [ ] QR functionality works. [ ] NFC functionality works on compatible hardware. [ ] Analytics work. [ ] Habits work. [ ] Backup and restore work. [ ] Permissions are explained. [ ] Dark mode works. [ ] Accessibility is considered. [ ] Tests are implemented and executed where possible. [ ] Documentation is complete. [ ] License is included. [ ] Original branding assets are included. [ ] No fake features are presented as complete. [ ] No critical build errors remain.
+
+Produce a final implementation report listing:
+
+Implemented features.
+Partially implemented features.
+Unsupported features.
+Required permissions.
+Build and test results.
+Known bugs.
+Remaining work.
+35. HOW YOU MUST WORK AS THE AI DEVELOPMENT AGENT
+
+Do not attempt to squeeze the entire application into one enormous file or one response.
+
+Work directly on the project files using the available Build environment.
+
+First inspect the project environment and identify its Android generation constraints.
+
+Then:
+
+Create the project architecture.
+Create the application theme and branding.
+Implement the core modules.
+Connect the database.
+Implement actual Android APIs.
+Connect every screen to its ViewModel.
+Implement background and foreground components appropriately.
+Generate tests.
+Build and run the project.
+Fix compilation and runtime errors.
+Verify the UI in the emulator.
+Complete documentation.
+Produce the final report.
+
+After every phase, verify that the previous working functionality remains intact.
+
+Do not replace working code with simplified placeholder code.
+
+If you encounter output or context limits, continue from the exact existing project state in subsequent iterations.
+
+Never discard completed source files merely to reduce output length.
+
+Maintain a project implementation checklist.
+
+When asked to add a feature, integrate it into the existing architecture rather than rebuilding unrelated modules.
+
+If you need clarification, make reasonable engineering decisions and document them rather than stopping unnecessarily.
+
+FINAL INSTRUCTION
+
+Build FocusNest as a genuinely useful, polished, independent, privacy-first, free and open-source Android application.
+
+The goal is not to produce a visual demonstration.
+
+The goal is to create a real product that Android users can install, configure, use daily, inspect, modify and contribute to.
+
+Prioritize correctness, reliability, privacy, usability, maintainability and honest feature support over the number of features.
+
+Start building the actual Android project now.

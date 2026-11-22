@@ -1,0 +1,10 @@
+FocusNest is a 100% free, privacy-first, open-source Android digital wellbeing companion.
+
+- Real screen-time analytics via Android UsageStatsManager
+- Pomodoro, Countdown & Stopwatch focus sessions with reboot persistence
+- Configurable app limits, shared app groups, and priority-ordered profiles
+- 11 unlock challenges including offline QR/Barcode scanning, NFC tags, Adaptive Math, and Intention Entry
+- Optional on-device VpnService DNS website filter and configurable Reels/Shorts pause prompts
+- Encrypted AES-256-GCM local backups and CSV/JSON/Printable reports
+
+No ads, no trackers, no accounts, and no internet permission.

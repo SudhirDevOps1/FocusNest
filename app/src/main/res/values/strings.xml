@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">FocusNest</string>
+    <string name="app_tagline">Own Your Time. Protect Your Focus.</string>
+    <string name="quick_tile_label">Focus Shield</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_focus">Focus</string>
+    <string name="nav_blocker">Blocker</string>
+    <string name="nav_insights">Insights</string>
+    <string name="nav_more">More</string>
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="habits_title">Daily &amp; Weekly Habits</string>
+    <string name="habits_subtitle">Track mindful offline routines and build consistent streaks</string>
+    <string name="accessibility_service_description">FocusNest Optional Focus &amp; Reels Assistant: Helps enforce your chosen app blocks and short-form content pause reminders locally on your device. Never collects, logs, or transmits screen contents.</string>
+    <string name="notification_listener_description">FocusNest Optional Notification Filter: Manages local notification muting during Focus and Bedtime profiles. All records remain strictly on your device.</string>
+    <string name="widget_screen_time_desc">Shows today\'s screen time and daily goal progress from FocusNest.</string>
+    <string name="widget_focus_timer_desc">Quickly view or launch a FocusNest focus session.</string>
+    <string name="widget_blocking_profile_desc">Shows active blocking profile status and blocked attempts.</string>
+    <string name="widget_shield_header">FOCUSNEST • SHIELD</string>
+    <string name="widget_no_active_profile">No Active Profile</string>
+    <string name="widget_zero_attempts">0 blocked attempts today</string>
+    <string name="widget_timer_header">FOCUSNEST • TIMER</string>
+    <string name="widget_timer_ready_default">Ready • 25m</string>
+    <string name="widget_quick_focus">Quick Focus</string>
+    <string name="widget_screen_time_header">FOCUSNEST • SCREEN TIME</string>
+    <string name="widget_zero_minutes">0m</string>
+    <string name="widget_goal_default">Goal: 3h 0m</string>
+</resources>

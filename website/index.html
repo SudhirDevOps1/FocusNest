@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-palette="sage">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="FocusNest v1.2.0 — 100% Free, MIT Open Source, Offline-First Android Digital Wellbeing, App Blocking, Ambient Focus Sanctuary & Habit Tracker." />
+  <title>FocusNest v1.2.0 — Own Your Time. Protect Your Focus.</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <a href="#" class="brand">
+      <img src="favicon.svg" alt="FocusNest app icon" class="brand-icon" />
+      <div>
+        <span class="brand-name">FocusNest</span>
+        <span class="brand-ver">v1.2.0</span>
+      </div>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="#preview">Interactive Preview</a>
+      <a href="#features">Features</a>
+      <a href="#adaptive">Foldables &amp; Tablets</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#download">Releases</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-controls">
+      <div class="palette-picker" role="group" aria-label="Accent palette switcher">
+        <button class="swatch active" data-set-palette="sage" title="Sage Sanctuary" aria-label="Sage Sanctuary palette"></button>
+        <button class="swatch" data-set-palette="indigo" title="Indigo Focus" aria-label="Indigo Focus palette"></button>
+        <button class="swatch" data-set-palette="amber" title="Warm Amber" aria-label="Warm Amber palette"></button>
+        <button class="swatch" data-set-palette="slate" title="Ocean Slate" aria-label="Ocean Slate palette"></button>
+      </div>
+      <button id="themeToggle" class="theme-btn" type="button" aria-label="Toggle Light/Dark theme">
+        <span id="themeIcon">☀</span>
+        <span id="themeLabel">Light</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section id="preview" class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">100% FREE • MIT OPEN SOURCE • ZERO INTERNET PERMISSION</p>
+        <h1>Own Your Time.<br />Protect Your Focus.</h1>
+        <p class="lead">
+          FocusNest pairs genuine Android <strong>UsageStatsManager</strong> insights, reboot-persistent
+          Pomodoro &amp; offline synthesized ambient soundscapes, a Mindful App-Launch Pause Curtain,
+          12 unlock friction challenges, local on-device DNS website blocking, bedtime wind-down checklists,
+          and printable PDF wellbeing report cards—without ads, trackers, or cloud accounts.
+        </p>
+
+        <div class="trust-badges">
+          <span>Zero <code>INTERNET</code> Permission</span>
+          <span>Offline Audio Synthesis</span>
+          <span>Android 8 – 16 Ready</span>
+          <span>Adaptive Two-Pane UI</span>
+        </div>
+
+        <div class="cta-row">
+          <a href="https://github.com/OWNER/FocusNest/releases/latest" target="_blank" rel="noopener noreferrer" class="btn-primary">
+            Download v1.2.0 APK
+          </a>
+          <a href="#features" class="btn-secondary">Explore Features</a>
+          <a href="https://github.com/OWNER/FocusNest" target="_blank" rel="noopener noreferrer" class="btn-ghost">
+            GitHub Repository
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-interactive">
+        <div class="phone-frame" aria-live="polite">
+          <div class="phone-notch">
+            <span class="cam-dot"></span>
+            <span class="status-text">9:41 • 0 KB/s Offline</span>
+          </div>
+
+          <div class="phone-screen" id="phoneScreen">
+            <!-- Populated interactively by app.js -->
+          </div>
+
+          <div class="phone-tabs" role="tablist" aria-label="FocusNest interactive phone tabs">
+            <button class="phone-tab active" data-screen="home" role="tab" aria-selected="true">Home</button>
+            <button class="phone-tab" data-screen="focus" role="tab" aria-selected="false">Focus</button>
+            <button class="phone-tab" data-screen="habits" role="tab" aria-selected="false">Habits</button>
+            <button class="phone-tab" data-screen="shield" role="tab" aria-selected="false">Shield</button>
+            <button class="phone-tab" data-screen="unlock" role="tab" aria-selected="false">Unlock</button>
+          </div>
+        </div>
+        <p class="preview-hint">Click the 5 tabs inside the phone preview or switch accents/themes in the top bar.</p>
+      </div>
+    </section>
+
+    <section class="privacy-strip" aria-label="Verified privacy posture">
+      <div class="strip-item">
+        <strong>0 Network Access</strong>
+        <span>Omits <code>android.permission.INTERNET</code> in <code>AndroidManifest.xml</code></span>
+      </div>
+      <div class="strip-item">
+        <strong>Local Room SQLite</strong>
+        <span>21 indexed tables with non-destructive migrations on-device</span>
+      </div>
+      <div class="strip-item">
+        <strong>AES-256-GCM Backups</strong>
+        <span>Portable PBKDF2WithHmacSHA256 encrypted archives under your control</span>
+      </div>
+      <div class="strip-item">
+        <strong>CI-Verified Releases</strong>
+        <span>Every APK/AAB built via GitHub Actions with public <code>SHA256SUMS.txt</code></span>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="section-head">
+        <p class="eyebrow">WHAT'S INSIDE v1.2.0</p>
+        <h2>Complete Digital Wellbeing Suite</h2>
+        <p class="section-lead">Every feature is 100% unlocked from day one under the MIT License—zero paywalls or pro tiers.</p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="card-tag">Insights &amp; Print</div>
+          <h3>Weekly PDF Wellbeing Report Card</h3>
+          <p>Real Android UsageStatsManager telemetry across daily, weekly, monthly, and custom windows plus styled printable/PDF wellbeing summaries, CSV, and JSON exports.</p>
+        </article>
+        <article class="card">
+          <div class="card-tag">Synthesized Audio</div>
+          <h3>Offline Ambient Focus Soundscapes</h3>
+          <p>Pure-Kotlin procedural <code>AudioTrack</code> synthesis delivers Brown Noise, Soft Rain, Warm Drone, and Study Wash with zero audio asset bloat or internet streaming.</p>
+        </article>
+        <article class="card">
+          <div class="card-tag">App Opening Buffer</div>
+          <h3>Mindful Launch Pause Curtain</h3>
+          <p>Arm selected apps with a 5–15 second breathing orb pause before launch so impulse muscle memory stops before mindless scrolling begins.</p>
+        </article>
+        <article class="card">
+          <div class="card-tag">12 Mechanisms</div>
+          <h3>Configurable Unlock Challenges</h3>
+          <p>Guided Breathing, Adaptive Math, Sentence Typing, Intention Entry, Signed One-Time/Timed QR &amp; Barcode Scan, NFC Tag Tap, Cooldowns, and Strict Mode.</p>
+        </article>
+        <article class="card">
+          <div class="card-tag">Evening Routine</div>
+          <h3>Bedtime Wind-Down &amp; Night Shortcuts</h3>
+          <p>Scheduled Do Not Disturb, daily auto-resetting evening checklist (charger away, grayscale, dim alerts, tomorrow's intention), and Display/Night Light shortcuts.</p>
+        </article>
+        <article class="card">
+          <div class="card-tag">On-Device Filtering</div>
+          <h3>Local VPN Website Filter &amp; Habits</h3>
+          <p>Local <code>VpnService</code> DNS sinkholing with per-app scoping, offline domain packs, Reels/Shorts pause reduction, 3 home widgets, and offline Daily Habits.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="adaptive" class="section alt">
+      <div class="adaptive-layout">
+        <div>
+          <p class="eyebrow">COMPACT • FOLDABLES • TABLETS • CHROMEOS</p>
+          <h2>Responsive Canonical Layouts</h2>
+          <p class="section-lead">
+            On phones, FocusNest presents focused vertical cards with a bottom NavigationBar.
+            At <code>720.dp+</code> widths (unfolded foldables, tablets, and Chromebook windows),
+            screens seamlessly adapt into a persistent NavigationRail, side-by-side <code>AdaptiveTwoPane</code>
+            views, and a two-pane List-Detail control center.
+          </p>
+          <ul class="check-list">
+            <li><strong>Home:</strong> Goal ring &amp; intention on left, charts &amp; top apps on right</li>
+            <li><strong>Focus:</strong> Live countdown timer on left, ambient soundscapes &amp; trend bars on right</li>
+            <li><strong>Blocker:</strong> Launch pause &amp; rules on left, searchable app roster on right</li>
+            <li><strong>More:</strong> Persistent hub menu on left, live subpage inspector on right</li>
+          </ul>
+        </div>
+        <div class="tablet-mock" aria-hidden="true">
+          <div class="tablet-rail">
+            <span class="rail-dot active"></span>
+            <span class="rail-dot"></span>
+            <span class="rail-dot"></span>
+            <span class="rail-dot"></span>
+            <span class="rail-dot"></span>
+          </div>
+          <div class="tablet-pane">
+            <div class="mini-card highlight">
+              <strong>Today's Goal Ring</strong>
+              <p>1h 42m / 3h 00m • Remaining 1h 18m</p>
+            </div>
+            <div class="mini-card">
+              <strong>Active Focus Sanctuary</strong>
+              <p>24:12 • Brown Noise @ 55%</p>
+            </div>
+            <div class="mini-card">
+              <strong>Launch Pause Curtain</strong>
+              <p>8s Breathing Delay • 3 apps armed</p>
+            </div>
+          </div>
+          <div class="tablet-pane">
+            <div class="mini-card">
+              <strong>Weekly Trend Bars</strong>
+              <div class="mini-bars">
+                <span style="height: 45%"></span>
+                <span style="height: 70%"></span>
+                <span style="height: 55%"></span>
+                <span style="height: 85%"></span>
+                <span style="height: 40%"></span>
+                <span style="height: 60%"></span>
+                <span style="height: 35%"></span>
+              </div>
+            </div>
+            <div class="mini-card">
+              <strong>Bedtime Checklist</strong>
+              <p>3 / 4 completed tonight • 0 KB sent</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="privacy" class="section">
+      <div class="section-head">
+        <p class="eyebrow">TRANSPARENT PERMISSIONS &amp; UPDATES</p>
+        <h2>How Updates Work Without Internet Permission</h2>
+        <p class="section-lead">
+          Unlike closed wellbeing apps that phone home daily, FocusNest keeps its APK cleanly offline.
+          Tapping <strong>Check Releases on GitHub</strong> in Settings delegates a standard Android
+          <code>ACTION_VIEW</code> link to your chosen browser at
+          <code>https://github.com/OWNER/FocusNest/releases/latest</code>—so FocusNest itself never opens a network socket.
+        </p>
+      </div>
+    </section>
+
+    <section id="download" class="section alt">
+      <div class="section-head">
+        <p class="eyebrow">FREE PUBLIC CI/CD • REPRODUCIBLE ARTIFACTS</p>
+        <h2>Download &amp; Verify Builds</h2>
+        <p class="section-lead">
+          Built automatically by public GitHub Actions workflows with Robolectric tests, Android Lint,
+          Zero-Internet manifest checks, and SHA-256 verification checksums.
+        </p>
+      </div>
+      <div class="download-grid">
+        <article class="card">
+          <h3>Prebuilt Android Releases</h3>
+          <p>Download the latest <code>v1.2.0</code> universal APK or App Bundle directly from GitHub Releases and verify against <code>SHA256SUMS.txt</code>.</p>
+          <a href="https://github.com/OWNER/FocusNest/releases/latest" target="_blank" rel="noopener noreferrer" class="btn-primary inline-btn">
+            Open GitHub Releases
+          </a>
+        </article>
+        <article class="card">
+          <h3>Build &amp; Test Locally</h3>
+          <pre class="code-block"><code>gradle :app:testDebugUnitTest
+gradle :app:lintDebug
+gradle :app:assembleRelease</code></pre>
+          <p class="status-note">No API keys or remote backend configuration required.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="section-head">
+        <p class="eyebrow">ANSWERS</p>
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="true">
+            <span>Is every FocusNest feature genuinely 100% free?</span>
+            <span class="faq-chevron">−</span>
+          </button>
+          <div class="faq-a open">
+            Yes. Blocking profiles, 12 unlock challenges, ambient synthesized soundscapes, habit tracking, local DNS website filtering, widgets, printable PDF report cards, and AES-256-GCM backups are all 100% free under the MIT License.
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false">
+            <span>Why does FocusNest omit the INTERNET permission?</span>
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-a">
+            Digital wellbeing telemetry—which apps you open, how long you study, and your personal reflections—should belong strictly to you. Removing <code>INTERNET</code> gives cryptographic and OS-level certainty that zero behavioral data leaves your device.
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false">
+            <span>How do I check for new app versions cleanly offline?</span>
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-a">
+            Go to <strong>More → Settings → App Version &amp; Offline Updates</strong> (or Privacy &amp; About) and tap <strong>Check Releases on GitHub</strong>. FocusNest hands off the URL to your web browser so Android's offline permission guarantee remains untouched.
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false">
+            <span>What are the limits of Reels/Shorts reduction and OEM background services?</span>
+            <span class="faq-chevron">+</span>
+          </button>
+          <div class="faq-a">
+            Reels/Shorts view-ID detection is optional, runs locally while enabled, and fails safely if a third-party social app changes its layout. For Realme UI, ColorOS, MIUI, and OneUI devices, visit <strong>More → Permissions</strong> for OEM battery lock guidance.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>FocusNest v1.2.0 • MIT Open Source • Zero Trackers • Zero Ads • <a href="https://github.com/OWNER/FocusNest" target="_blank" rel="noopener noreferrer">OWNER/FocusNest</a></p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

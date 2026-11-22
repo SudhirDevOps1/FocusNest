@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">FocusNest</string>
+    <string name="app_tagline">अपना समय संभालें। अपना ध्यान सुरक्षित रखें।</string>
+    <string name="quick_tile_label">फ़ोकस शील्ड</string>
+    <string name="nav_home">होम</string>
+    <string name="nav_focus">फ़ोकस</string>
+    <string name="nav_blocker">ब्लॉकर</string>
+    <string name="nav_insights">इनसाइट्स</string>
+    <string name="nav_more">अधिक</string>
+    <string name="greeting_morning">सुप्रभात</string>
+    <string name="greeting_afternoon">नमस्कार</string>
+    <string name="greeting_evening">शुभ संध्या</string>
+    <string name="habits_title">दैनिक और साप्ताहिक आदतें</string>
+    <string name="habits_subtitle">ऑफ़लाइन दिनचर्या ट्रैक करें और नियमित स्ट्रीक बनाएं</string>
+    <string name="accessibility_service_description">FocusNest वैकल्पिक फ़ोकस सहायक: आपके चुने हुए ऐप ब्लॉक और रील्स विराम नियमों को पूरी तरह आपके डिवाइस पर लागू करता है। स्क्रीन सामग्री कभी लॉग या भेजी नहीं जाती।</string>
+    <string name="notification_listener_description">FocusNest वैकल्पिक नोटिफ़िकेशन फ़िल्टर: फ़ोकस और बेडटाइम प्रोफ़ाइल के दौरान स्थानीय रूप से सूचनाएँ शांत करता है।</string>
+    <string name="widget_screen_time_desc">FocusNest से आज का स्क्रीन टाइम और दैनिक लक्ष्य प्रगति दिखाता है।</string>
+    <string name="widget_focus_timer_desc">FocusNest फ़ोकस सत्र तुरंत देखें या शुरू करें।</string>
+    <string name="widget_blocking_profile_desc">सक्रिय ब्लॉकिंग प्रोफ़ाइल स्थिति और ब्लॉक किए गए प्रयास दिखाता है।</string>
+    <string name="widget_shield_header">FOCUSNEST • शील्ड</string>
+    <string name="widget_no_active_profile">कोई सक्रिय प्रोफ़ाइल नहीं</string>
+    <string name="widget_zero_attempts">आज 0 ब्लॉक प्रयास</string>
+    <string name="widget_timer_header">FOCUSNEST • टाइमर</string>
+    <string name="widget_timer_ready_default">तैयार • 25m</string>
+    <string name="widget_quick_focus">त्वरित फ़ोकस</string>
+    <string name="widget_screen_time_header">FOCUSNEST • स्क्रीन टाइम</string>
+    <string name="widget_zero_minutes">0m</string>
+    <string name="widget_goal_default">लक्ष्य: 3h 0m</string>
+</resources>

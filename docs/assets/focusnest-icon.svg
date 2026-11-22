@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="FocusNest App Icon">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E2D27"/>
+      <stop offset="100%" stop-color="#174C41"/>
+    </linearGradient>
+    <linearGradient id="mintGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7CE3C4"/>
+      <stop offset="100%" stop-color="#38B593"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#bgGrad)"/>
+  <circle cx="64" cy="64" r="46" fill="none" stroke="rgba(124,227,196,0.22)" stroke-width="6"/>
+  <path d="M64 18 A46 46 0 1 1 28 94" fill="none" stroke="url(#mintGrad)" stroke-width="8" stroke-linecap="round"/>
+  <path d="M35 64 A29 29 0 1 1 64 93" fill="none" stroke="#A9CFC4" stroke-width="6.5" stroke-linecap="round"/>
+  <circle cx="64" cy="64" r="14" fill="#6558E8" stroke="#7CE3C4" stroke-width="4"/>
+  <circle cx="64" cy="64" r="5" fill="#F4B860"/>
+</svg>

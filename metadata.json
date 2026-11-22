@@ -1,0 +1,6 @@
+{
+  "name": "FocusNest",
+  "description": "Privacy-first offline digital wellbeing, focus timer, screen time insights, and app blocking for Android.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
