@@ -14,9 +14,6 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
-
 jobs:
   privacy-and-quality:
     name: Privacy Gate, Unit Tests & Lint
