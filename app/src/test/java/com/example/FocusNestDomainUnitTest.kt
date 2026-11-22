@@ -265,7 +265,7 @@ class FocusNestDomainUnitTest {
     assertEquals(5, com.example.domain.model.AmbientSoundType.entries.size)
     assertTrue(com.example.domain.model.BedtimeChecklistDefaults.steps.size >= 4)
     assertEquals(
-      "https://github.com/OWNER/FocusNest/releases/latest",
+      "https://github.com/SudhirDevOps1/FocusNest/releases/latest",
       com.example.domain.model.UpdateReleaseConfig.RELEASES_URL,
     )
   }
