@@ -242,10 +242,12 @@ class FocusNestHardeningSuiteTest {
   }
 
   @Test
-  fun replayTutorialWebsiteTesterAndSystemToggle_workInComposeUi() = runTest {
+  fun replayTutorialWebsiteTesterAndSystemToggle_workInComposeUi() {
     val app = ApplicationProvider.getApplicationContext<FocusNestApplication>()
-    app.container.preferences.clearAll()
-    app.container.preferences.markOnboardingCompleted()
+    kotlinx.coroutines.runBlocking {
+      app.container.preferences.clearAll()
+      app.container.preferences.markOnboardingCompleted()
+    }
     val vm = FocusNestViewModel(app)
 
     composeTestRule.setContent {
