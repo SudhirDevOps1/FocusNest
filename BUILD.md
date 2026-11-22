@@ -4,7 +4,7 @@
 - **Namespace**: `com.example`
 - **Version**: `1.2.0` (`versionCode = 2`)
 - **Min SDK**: 26 (Android 8.0) | **Target / Compile SDK**: 36
-- **JDK**: **Java 21** (Temurin 21 required for Robolectric SDK 36 unit tests)
+- **JDK**: **Java 17 or Java 21** (Robolectric suite targets Android SDK 34 for universal JDK 17 & 21 CI compatibility)
 
 ## Local Gradle Commands
 
