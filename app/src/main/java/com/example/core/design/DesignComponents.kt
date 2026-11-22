@@ -166,11 +166,12 @@ fun AnimatedGoalRing(
         style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
       )
     }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 8.dp)) {
       Text(
         text = centerTitle,
-        style = MaterialTheme.typography.headlineMedium.copy(fontFamily = JetBrainsMonoFontFamily),
+        style = MaterialTheme.typography.titleLarge.copy(fontFamily = JetBrainsMonoFontFamily, fontWeight = FontWeight.Bold),
         color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
       )
       Text(
         text = centerSubtitle,

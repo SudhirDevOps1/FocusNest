@@ -153,13 +153,21 @@ fun HomeDashboardScreen(
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
           FocusNestLogoMark(size = 38.dp)
           Spacer(modifier = Modifier.width(10.dp))
-          Column {
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
+          Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge)
+              Spacer(modifier = Modifier.width(8.dp))
+              Text(
+                dateFormatted,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
             Text(
-              "$greetingText • $dateFormatted • ${stringResource(R.string.app_tagline)}",
-              style = MaterialTheme.typography.bodyMedium,
+              "$greetingText • ${stringResource(R.string.app_tagline)}",
+              style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
-              maxLines = 1,
+              maxLines = 2,
               overflow = TextOverflow.Ellipsis,
             )
           }

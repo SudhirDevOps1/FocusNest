@@ -51,12 +51,12 @@ android {
       isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      // Production release signing: use release keystore if present, otherwise build unsigned
+      // Production release signing: use release keystore if present, otherwise fallback to debugConfig so release APKs are always properly signed and installable
       val releaseKeystore = file(System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks")
       signingConfig = if (releaseKeystore.exists()) {
         signingConfigs.getByName("release")
       } else {
-        null
+        signingConfigs.getByName("debugConfig")
       }
     }
     debug {
@@ -153,6 +153,7 @@ dependencies {
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.robolectric)
+  testImplementation("org.robolectric:android-all:14-robolectric-10818077")
   androidTestImplementation(platform(libs.androidx.compose.bom))
   androidTestImplementation(libs.androidx.compose.ui.test.junit4)
   androidTestImplementation(libs.androidx.espresso.core)
