@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload Test & Lint Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: quality-reports
           if-no-files-found: ignore
@@ -86,7 +86,7 @@ jobs:
           (cd dist && sha256sum * > SHA256SUMS.txt)
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: focusnest-android-artifacts
           path: dist/
