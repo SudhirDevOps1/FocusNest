@@ -15,3 +15,9 @@
 .cxx
 local.properties
 .env
+
+# AI Studio & scratch assets
+**/aistudio/
+**/*aistudio*
+public/assets/aistudio/
+Paste_*

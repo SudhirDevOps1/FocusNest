@@ -12,7 +12,7 @@
   <meta property="og:url" content="https://sudhirdevops1.github.io/FocusNest/" />
   <meta property="og:image" content="https://sudhirdevops1.github.io/FocusNest/assets/focusnest-banner.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
-  <title>FocusNest v1.2.0 — Own Your Time. Protect Your Focus.</title>
+  <title>FocusNest v1.3.0 — Own Your Time. Protect Your Focus.</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="apple-touch-icon" href="assets/focusnest-icon.jpg" />
   <link rel="stylesheet" href="styles.css" />
@@ -26,7 +26,7 @@
       <img src="assets/focusnest-icon.jpg" alt="FocusNest custom icon" class="brand-icon" width="38" height="38" />
       <div class="brand-text">
         <span class="brand-name">FocusNest</span>
-        <span class="brand-ver">v1.2.0 • MIT</span>
+        <span class="brand-ver">v1.3.0 • MIT</span>
       </div>
     </a>
 
@@ -101,22 +101,50 @@
 
       <div class="hero-interactive">
         <div class="phone-frame" aria-live="polite">
+          <div class="phone-speaker-slit"></div>
           <div class="phone-notch">
-            <span class="cam-dot"></span>
-            <span class="status-text">9:41 • Offline • 0 KB/s</span>
+            <div class="status-left">
+              <span class="status-time">09:41</span>
+              <span class="status-app-icon" title="FocusNest Zero-Net Active">🌿</span>
+            </div>
+            <div class="camera-punch"><div class="lens-reflection"></div></div>
+            <div class="status-right">
+              <span class="status-net">5G</span>
+              <svg class="status-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.55 0 6.78 1.41 9.15 3.7L12 18.52 2.85 11.2C5.22 8.91 8.45 7.5 12 7.5z"/></svg>
+              <div class="battery-pill" title="Battery 98% (Offline)">
+                <span class="battery-level"></span>
+                <span class="battery-tip"></span>
+              </div>
+            </div>
           </div>
 
           <div class="phone-screen" id="phoneScreen"></div>
 
           <div class="phone-tabs" role="tablist" aria-label="FocusNest interactive phone tabs">
-            <button class="phone-tab active" data-screen="home" role="tab" aria-selected="true">Home</button>
-            <button class="phone-tab" data-screen="focus" role="tab" aria-selected="false">Focus</button>
-            <button class="phone-tab" data-screen="habits" role="tab" aria-selected="false">Habits</button>
-            <button class="phone-tab" data-screen="shield" role="tab" aria-selected="false">Shield</button>
-            <button class="phone-tab" data-screen="unlock" role="tab" aria-selected="false">Unlock</button>
+            <button class="phone-tab active" data-screen="home" role="tab" aria-selected="true">
+              <span class="tab-icon">🏠</span>
+              <span class="tab-label">Home</span>
+            </button>
+            <button class="phone-tab" data-screen="focus" role="tab" aria-selected="false">
+              <span class="tab-icon">⏳</span>
+              <span class="tab-label">Focus</span>
+            </button>
+            <button class="phone-tab" data-screen="habits" role="tab" aria-selected="false">
+              <span class="tab-icon">📅</span>
+              <span class="tab-label">Habits</span>
+            </button>
+            <button class="phone-tab" data-screen="shield" role="tab" aria-selected="false">
+              <span class="tab-icon">🛡️</span>
+              <span class="tab-label">Shield</span>
+            </button>
+            <button class="phone-tab" data-screen="unlock" role="tab" aria-selected="false">
+              <span class="tab-icon">🔐</span>
+              <span class="tab-label">Friction</span>
+            </button>
           </div>
+          <div class="gesture-bar-area"><div class="gesture-bar"></div></div>
         </div>
-        <p class="preview-hint">Switch any of the 5 phone tabs above or test palettes &amp; Light/Dark mode in the top bar.</p>
+        <p class="preview-hint">Live Interactive Mockup • Tap any tab to explore real Android screens</p>
       </div>
     </section>
 
@@ -658,7 +686,7 @@ gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug</code></pre>
 
   <footer class="footer" role="contentinfo">
     <p>
-      <strong>FocusNest v1.2.0</strong> • Created by <strong>Sudhir Kumar</strong> (<a href="https://github.com/SudhirDevOps1" target="_blank" rel="noopener noreferrer">@SudhirDevOps1</a>)
+      <strong>FocusNest v1.3.0</strong> • Created by <strong>Sudhir Kumar</strong> (<a href="https://github.com/SudhirDevOps1" target="_blank" rel="noopener noreferrer">@SudhirDevOps1</a>)
       • MIT Open Source • Zero Trackers •
       <a href="https://github.com/SudhirDevOps1/FocusNest" target="_blank" rel="noopener noreferrer">SudhirDevOps1/FocusNest</a>
     </p>

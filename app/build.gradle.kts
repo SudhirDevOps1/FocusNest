@@ -8,6 +8,13 @@ plugins {
   alias(libs.plugins.google.services)
 }
 
+val versionJsonFile = file("${rootDir}/version.json")
+val versionProps: Map<*, *> = if (versionJsonFile.exists()) {
+  groovy.json.JsonSlurper().parse(versionJsonFile) as Map<*, *>
+} else {
+  mapOf("version" to "1.3.0", "versionCode" to 3)
+}
+
 android {
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
@@ -16,14 +23,13 @@ android {
     applicationId = "com.aistudio.focusnest.fnwbx"
     minSdk = 26
     targetSdk = 36
-    versionCode = 2
-    versionName = "1.2.0"
+    versionCode = (versionProps["versionCode"] as Number).toInt()
+    versionName = versionProps["version"] as String
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
-  // Do not remove or modify these signingConfigs. They are necessary for building, installing,
-  // and updating Android apps in AI Studio.
+  // Production signing configuration
   signingConfigs {
     create("release") {
       val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
@@ -45,8 +51,7 @@ android {
       isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      // Do not remove or modify this signingConfig assignment. It is necessary for Android apps in
-      // AI Studio.
+      // Production release signing: use release keystore if present, otherwise build unsigned
       val releaseKeystore = file(System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks")
       signingConfig = if (releaseKeystore.exists()) {
         signingConfigs.getByName("release")
@@ -55,8 +60,7 @@ android {
       }
     }
     debug {
-      // Do not remove or modify this signingConfig assignment. It is necessary for Android apps in
-      // AI Studio.
+      // Production debug signing fallback
       val debugKeystore = file("${rootDir}/debug.keystore")
       signingConfig = if (debugKeystore.exists()) {
         signingConfigs.getByName("debugConfig")

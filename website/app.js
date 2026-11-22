@@ -1,100 +1,273 @@
 const phoneScreens = {
   home: `
-    <div class="p-head">
-      <span class="p-title">Home Dashboard</span>
-      <span class="p-badge">Measured • Today</span>
+    <div class="m3-appbar">
+      <div class="m3-user-greeting">
+        <div class="m3-avatar">🌿</div>
+        <div>
+          <div class="m3-app-name">FocusNest</div>
+          <div class="m3-app-sub">100% Offline Sanctuary</div>
+        </div>
+      </div>
+      <div class="m3-badge-pill">🛡️ Strict Mode</div>
     </div>
-    <div class="p-ring">
-      <strong>1h 42m</strong>
-      <span>of 3h goal</span>
+
+    <!-- Photorealistic Circular Progress Gauge -->
+    <div class="m3-gauge-card">
+      <div class="m3-gauge-wrap">
+        <svg class="m3-gauge-svg" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="66" class="m3-gauge-bg"></circle>
+          <circle cx="80" cy="80" r="66" class="m3-gauge-bar" stroke-dasharray="414.69" stroke-dashoffset="182.46"></circle>
+        </svg>
+        <div class="m3-gauge-center">
+          <span class="m3-gauge-metric">1h 42m</span>
+          <span class="m3-gauge-target">of 3h Daily Limit</span>
+          <span class="m3-gauge-chip">44% Remaining</span>
+        </div>
+      </div>
     </div>
-    <div class="p-card highlight">
-      <div class="p-card-title">Daily Intention</div>
-      <div class="p-card-sub">"Finish thesis draft before checking social feeds."</div>
+
+    <!-- 3 Core Production Metrics -->
+    <div class="m3-stats-row">
+      <div class="m3-stat-item">
+        <span class="m3-stat-num">24</span>
+        <span class="m3-stat-lbl">Pickups (↓ 18%)</span>
+      </div>
+      <div class="m3-stat-item">
+        <span class="m3-stat-num">48m</span>
+        <span class="m3-stat-lbl">Longest Block</span>
+      </div>
+      <div class="m3-stat-item">
+        <span class="m3-stat-num">0 KB</span>
+        <span class="m3-stat-lbl">Zero Network</span>
+      </div>
     </div>
-    <div class="p-card">
-      <div class="p-card-title">Launcher Exclusion Active</div>
-      <div class="p-card-sub">Pixel Launcher &amp; SystemUI excluded from distraction rank</div>
+
+    <!-- Daily Intention Card -->
+    <div class="m3-card m3-card-accent">
+      <div class="m3-card-header">
+        <span class="m3-card-icon">🎯</span>
+        <span class="m3-card-title">Daily Deep Work Intention</span>
+      </div>
+      <div class="m3-intention-quote">"Finish thesis draft before opening social media feeds."</div>
+      <div class="m3-intention-meta">Pinned at 08:00 AM • Auto-clears at midnight</div>
+    </div>
+
+    <!-- Launcher Security Alert -->
+    <div class="m3-card">
+      <div class="m3-card-header">
+        <span class="m3-card-icon">⚡</span>
+        <span class="m3-card-title">Active Protection Filters</span>
+      </div>
+      <div class="m3-card-desc">Pixel Launcher &amp; SystemUI excluded from distraction rank. 3 distracting apps locked until 18:00.</div>
     </div>
   `,
   focus: `
-    <div class="p-head">
-      <span class="p-title">Focus Sanctuary</span>
-      <span class="p-badge">Pomodoro 25m</span>
+    <div class="m3-appbar">
+      <div>
+        <div class="m3-app-name">Focus Sanctuary</div>
+        <div class="m3-app-sub">Foreground Timer Service</div>
+      </div>
+      <div class="m3-badge-pill m3-pill-active">Cycle 2 of 4</div>
     </div>
-    <div class="p-ring">
-      <strong>21:48</strong>
-      <span>Cycle 2 of 4</span>
-    </div>
-    <div class="p-card highlight">
-      <div class="p-card-title">Offline Ambient Soundscape</div>
-      <div class="p-card-sub">Procedural AudioTrack synthesis (0 KB network)</div>
-      <div class="p-chips">
-        <span class="p-chip">Off</span>
-        <span class="p-chip active">Brown Noise</span>
-        <span class="p-chip">Soft Rain</span>
-        <span class="p-chip">Warm Drone</span>
+
+    <!-- Monotonic Pomodoro Ring -->
+    <div class="m3-gauge-card">
+      <div class="m3-gauge-wrap">
+        <svg class="m3-gauge-svg" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="66" class="m3-gauge-bg"></circle>
+          <circle cx="80" cy="80" r="66" class="m3-gauge-bar m3-bar-focus" stroke-dasharray="414.69" stroke-dashoffset="65.0"></circle>
+        </svg>
+        <div class="m3-gauge-center">
+          <span class="m3-gauge-metric">21:48</span>
+          <span class="m3-gauge-target">Monotonic Pomodoro</span>
+          <span class="m3-gauge-chip">Deep Coding Mode</span>
+        </div>
       </div>
     </div>
-    <div class="p-card">
-      <div class="p-card-title">Today's Focus</div>
-      <div class="p-card-sub">3 sessions • 75m • 7-day streak</div>
+
+    <!-- AudioTrack Ambient Synthesizer -->
+    <div class="m3-card m3-card-accent">
+      <div class="m3-card-header">
+        <span class="m3-card-icon">🎧</span>
+        <span class="m3-card-title">Procedural Soundscape (0 KB Network)</span>
+      </div>
+      <div class="m3-sound-eq">
+        <div class="m3-eq-bar eq-1"></div>
+        <div class="m3-eq-bar eq-2"></div>
+        <div class="m3-eq-bar eq-3"></div>
+        <div class="m3-eq-bar eq-4"></div>
+        <div class="m3-eq-bar eq-5"></div>
+        <div class="m3-eq-bar eq-6"></div>
+        <div class="m3-eq-bar eq-7"></div>
+        <div class="m3-eq-bar eq-8"></div>
+        <div class="m3-eq-bar eq-9"></div>
+        <div class="m3-eq-bar eq-10"></div>
+        <div class="m3-eq-bar eq-11"></div>
+        <div class="m3-eq-bar eq-12"></div>
+      </div>
+      <div class="m3-chips-row">
+        <span class="m3-chip m3-chip-active">Brown Noise</span>
+        <span class="m3-chip">Soft Rain</span>
+        <span class="m3-chip">Warm Drone</span>
+        <span class="m3-chip">40Hz Binaural</span>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="m3-actions-row">
+      <button class="m3-btn-sub" type="button">+5m Extend</button>
+      <button class="m3-btn-main" type="button">⏸ Pause Session</button>
     </div>
   `,
   habits: `
-    <div class="p-head">
-      <span class="p-title">Habits &amp; Wind-Down</span>
-      <span class="p-badge">7d Strip</span>
+    <div class="m3-appbar">
+      <div>
+        <div class="m3-app-name">Habits &amp; Wind-Down</div>
+        <div class="m3-app-sub">7-Day Consistency Tracker</div>
+      </div>
+      <div class="m3-badge-pill">🔥 12-Day Streak</div>
     </div>
-    <div class="p-card highlight">
-      <div class="p-card-title">Evening Wind-Down Checklist</div>
-      <div class="p-check-row"><span>Dock charger away from bed</span><strong>Done</strong></div>
-      <div class="p-check-row"><span>Bedtime Grayscale / Night Light</span><strong>Done</strong></div>
-      <div class="p-check-row"><span>Dim alerts before sleep</span><strong>Done</strong></div>
-      <div class="p-check-row"><span>Tomorrow's morning focus</span><span>Pending</span></div>
+
+    <!-- 7-Day Streak Row -->
+    <div class="m3-card">
+      <div class="m3-card-header">
+        <span class="m3-card-icon">📅</span>
+        <span class="m3-card-title">Weekly Discipline Strip</span>
+      </div>
+      <div class="m3-streak-strip">
+        <div class="m3-streak-day done"><span class="day-lbl">M</span><span class="day-chk">✓</span></div>
+        <div class="m3-streak-day done"><span class="day-lbl">T</span><span class="day-chk">✓</span></div>
+        <div class="m3-streak-day done"><span class="day-lbl">W</span><span class="day-chk">✓</span></div>
+        <div class="m3-streak-day done"><span class="day-lbl">T</span><span class="day-chk">✓</span></div>
+        <div class="m3-streak-day done"><span class="day-lbl">F</span><span class="day-chk">✓</span></div>
+        <div class="m3-streak-day done"><span class="day-lbl">S</span><span class="day-chk">✓</span></div>
+        <div class="m3-streak-day today"><span class="day-lbl">S</span><span class="day-chk">★</span></div>
+      </div>
     </div>
-    <div class="p-card">
-      <div class="p-card-title">Daily Streaks</div>
-      <div class="p-card-sub">Morning Screen-Free Hour • 11-day streak</div>
+
+    <!-- Bedtime Checklist -->
+    <div class="m3-card m3-card-accent">
+      <div class="m3-card-header">
+        <span class="m3-card-icon">🌙</span>
+        <span class="m3-card-title">Evening Wind-Down Checklist</span>
+      </div>
+      <div class="m3-check-list">
+        <div class="m3-check-item checked">
+          <span class="check-box">✓</span>
+          <span class="check-text">Dock charger outside bedroom</span>
+        </div>
+        <div class="m3-check-item checked">
+          <span class="check-box">✓</span>
+          <span class="check-text">Bedtime Grayscale &amp; Night Light</span>
+        </div>
+        <div class="m3-check-item checked">
+          <span class="check-box">✓</span>
+          <span class="check-text">Dim alerts &amp; armed strict DND</span>
+        </div>
+        <div class="m3-check-item">
+          <span class="check-box">○</span>
+          <span class="check-text">Tomorrow's morning focus planned</span>
+        </div>
+      </div>
     </div>
   `,
   shield: `
-    <div class="p-head">
-      <span class="p-title">Shield &amp; Local VPN</span>
-      <span class="p-badge">CONNECTED</span>
+    <div class="m3-appbar">
+      <div>
+        <div class="m3-app-name">Shield &amp; Firewall</div>
+        <div class="m3-app-sub">Local On-Device VpnService</div>
+      </div>
+      <div class="m3-badge-pill m3-pill-active">CONNECTED</div>
     </div>
-    <div class="p-card highlight">
-      <div class="p-card-title">Mindful Launch Pause Curtain</div>
-      <div class="p-card-sub">8s breathing delay armed before opening Social &amp; Video apps</div>
-      <div class="p-chips">
-        <span class="p-chip active">Enabled • 8s</span>
-        <span class="p-chip">3 apps armed</span>
+
+    <!-- App Blocking List -->
+    <div class="m3-card">
+      <div class="m3-card-header">
+        <span class="m3-card-icon">🚫</span>
+        <span class="m3-card-title">Enforced App Limits</span>
+      </div>
+      <div class="m3-app-list">
+        <div class="m3-app-row">
+          <div class="m3-app-meta">
+            <div class="m3-app-logo ig-logo">📷</div>
+            <div>
+              <div class="m3-app-row-title">Instagram</div>
+              <div class="m3-app-row-sub">20m limit • <strong>Locked (Limit reached)</strong></div>
+            </div>
+          </div>
+          <div class="m3-switch active"><div class="m3-switch-thumb"></div></div>
+        </div>
+        <div class="m3-app-row">
+          <div class="m3-app-meta">
+            <div class="m3-app-logo yt-logo">▶</div>
+            <div>
+              <div class="m3-app-row-title">YouTube Shorts</div>
+              <div class="m3-app-row-sub">30m limit • 8m remaining today</div>
+            </div>
+          </div>
+          <div class="m3-switch active"><div class="m3-switch-thumb"></div></div>
+        </div>
+        <div class="m3-app-row">
+          <div class="m3-app-meta">
+            <div class="m3-app-logo tt-logo">🎵</div>
+            <div>
+              <div class="m3-app-row-title">TikTok</div>
+              <div class="m3-app-row-sub">Zero Allowance • Permanently Blocked</div>
+            </div>
+          </div>
+          <div class="m3-switch active"><div class="m3-switch-thumb"></div></div>
+        </div>
       </div>
     </div>
-    <div class="p-card">
-      <div class="p-card-title">Local On-Device DNS Filter</div>
-      <div class="p-card-sub">VpnService CONNECTED • 14 blocked hits • Allowlist override ready</div>
+
+    <!-- Mindful Curtain Banner -->
+    <div class="m3-card m3-card-accent">
+      <div class="m3-card-header">
+        <span class="m3-card-icon">🛡️</span>
+        <span class="m3-card-title">Mindful Delay Pause Curtain</span>
+      </div>
+      <div class="m3-card-desc">8-second breathing delay armed before opening any target app. 14 tracker queries dropped locally.</div>
     </div>
   `,
   unlock: `
-    <div class="p-head">
-      <span class="p-title">Mindful Pause &amp; Unlock</span>
-      <span class="p-badge">8s Curtain</span>
+    <div class="m3-appbar">
+      <div>
+        <div class="m3-app-name">Mindful Pause Curtain</div>
+        <div class="m3-app-sub">Friction Before Distraction</div>
+      </div>
+      <div class="m3-badge-pill">8s Armed</div>
     </div>
-    <div class="p-ring">
-      <strong>Inhale…</strong>
-      <span>5s left to decide</span>
+
+    <!-- Breathing Orb Animation -->
+    <div class="m3-breathing-card">
+      <div class="m3-breathe-orb">
+        <div class="m3-orb-ring ring-1"></div>
+        <div class="m3-orb-ring ring-2"></div>
+        <div class="m3-orb-center">
+          <span class="m3-breathe-lbl">Inhale…</span>
+          <span class="m3-breathe-sec">5s</span>
+        </div>
+      </div>
+      <div class="m3-breathe-hint">Notice the urge. Take a slow deep breath before deciding.</div>
     </div>
-    <div class="p-card highlight">
-      <div class="p-card-title">Return to Focus</div>
-      <div class="p-card-sub">Primary CTA closes distracting app immediately.</div>
+
+    <!-- Decision CTA -->
+    <div class="m3-actions-row">
+      <button class="m3-btn-main" type="button">🌿 Return to Focus</button>
+      <button class="m3-btn-sub" type="button">Wait 5s</button>
     </div>
-    <div class="p-card">
-      <div class="p-card-title">12 Friction Mechanisms</div>
-      <div class="p-chips">
-        <span class="p-chip active">Breathing</span>
-        <span class="p-chip">Adaptive Math</span>
-        <span class="p-chip">QR/NFC Token</span>
+
+    <!-- Friction Challenge Options -->
+    <div class="m3-card">
+      <div class="m3-card-header">
+        <span class="m3-card-icon">🔐</span>
+        <span class="m3-card-title">Anti-Impulse Friction Vault</span>
+      </div>
+      <div class="m3-chips-row">
+        <span class="m3-chip m3-chip-active">Breathing Pause</span>
+        <span class="m3-chip">Adaptive Math</span>
+        <span class="m3-chip">NFC Token</span>
+        <span class="m3-chip">QR Scan</span>
       </div>
     </div>
   `,
@@ -334,6 +507,35 @@ function renderPhoneTab(key) {
 }
 tabButtons.forEach((btn) => btn.addEventListener('click', () => renderPhoneTab(btn.dataset.screen)));
 renderPhoneTab('home');
+
+// Interactive clicks inside phone screen mockup (chips, checklists, app switches)
+if (screenEl) {
+  screenEl.addEventListener('click', (e) => {
+    const chip = e.target.closest('.m3-chip');
+    if (chip) {
+      const container = chip.closest('.m3-chips-row');
+      if (container) {
+        container.querySelectorAll('.m3-chip').forEach((c) => c.classList.remove('m3-chip-active'));
+        chip.classList.add('m3-chip-active');
+      }
+      return;
+    }
+    const checkItem = e.target.closest('.m3-check-item');
+    if (checkItem) {
+      checkItem.classList.toggle('checked');
+      const box = checkItem.querySelector('.check-box');
+      if (box) {
+        box.textContent = checkItem.classList.contains('checked') ? '✓' : '○';
+      }
+      return;
+    }
+    const sw = e.target.closest('.m3-switch');
+    if (sw) {
+      sw.classList.toggle('active');
+      return;
+    }
+  });
+}
 
 // 2. Theme & Palette Switchers
 const themeBtn = document.getElementById('themeToggle');
