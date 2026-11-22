@@ -454,7 +454,9 @@ fun HomeDashboardScreen(
     item {
       SectionHeader(
         title = "Most-Used Apps Today",
-        subtitle = "Time & measurable app openings",
+        subtitle =
+          if (settings.showSystemAppsInStats) "Including system utilities • Time & app openings"
+          else "Launcher & SystemUI hidden by default • Editable in Insights/Settings",
         actionLabel = "Full Insights",
         onActionClick = onNavigateToInsights,
       )

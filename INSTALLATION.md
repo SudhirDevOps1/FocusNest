@@ -1,7 +1,7 @@
 # Installation & Build Guide
 
 ## Option 1: Prebuilt GitHub Release
-1. Visit [`https://github.com/OWNER/FocusNest/releases/latest`](https://github.com/OWNER/FocusNest/releases/latest) (or tap **More > Settings > Check Releases on GitHub** inside FocusNest).
+1. Visit [`https://github.com/SudhirDevOps1/FocusNest/releases/latest`](https://github.com/SudhirDevOps1/FocusNest/releases/latest) (or tap **More > Settings > Check Releases on GitHub** inside FocusNest).
 2. Download the `.apk` artifact and optionally verify its SHA-256 hash against `SHA256SUMS.txt`.
 
 ## Option 2: Build from Source

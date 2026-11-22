@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.Process
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -28,7 +29,7 @@ import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [36])
+@Config(sdk = [34])
 class ExampleRobolectricTest {
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -69,12 +70,15 @@ class ExampleRobolectricTest {
   @Test
   fun onboardingToDashboard_andFiveTabNavigation_works() {
     val app = ApplicationProvider.getApplicationContext<FocusNestApplication>()
+    kotlinx.coroutines.runBlocking { app.container.preferences.clearAll() }
     val vm = FocusNestViewModel(app)
 
     composeTestRule.setContent {
       FocusNestAppRoot(viewModel = vm, useNavRail = false)
     }
-    composeTestRule.waitForIdle()
+    composeTestRule.waitUntil(timeoutMillis = 5_000) {
+      composeTestRule.onAllNodesWithText("Welcome to FocusNest").fetchSemanticsNodes().isNotEmpty()
+    }
 
     composeTestRule.onNodeWithText("Welcome to FocusNest").assertIsDisplayed()
     composeTestRule.onNodeWithTag("onboarding_skip_all_btn").performClick()
@@ -126,12 +130,15 @@ class ExampleRobolectricTest {
   @Test
   fun launchPauseReportCardWindDownAndReleases_renderAndInteractInUi() {
     val app = ApplicationProvider.getApplicationContext<FocusNestApplication>()
+    kotlinx.coroutines.runBlocking { app.container.preferences.clearAll() }
     val vm = FocusNestViewModel(app)
 
     composeTestRule.setContent {
       FocusNestAppRoot(viewModel = vm, useNavRail = false)
     }
-    composeTestRule.waitForIdle()
+    composeTestRule.waitUntil(timeoutMillis = 5_000) {
+      composeTestRule.onAllNodesWithText("Welcome to FocusNest").fetchSemanticsNodes().isNotEmpty()
+    }
     composeTestRule.onNodeWithTag("onboarding_skip_all_btn").performClick()
     composeTestRule.waitUntil(timeoutMillis = 5_000) {
       composeTestRule.onAllNodesWithText("Today's Screen Time").fetchSemanticsNodes().isNotEmpty()
@@ -140,7 +147,8 @@ class ExampleRobolectricTest {
     // Focus tab has Offline Ambient Soundscapes
     composeTestRule.onNodeWithTag("nav_focus").performClick()
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithText("Offline Ambient Soundscape").performScrollTo().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("focus_lazy_list").performScrollToNode(hasText("Offline Ambient Soundscape"))
+    composeTestRule.onNodeWithText("Offline Ambient Soundscape").assertIsDisplayed()
 
     // Blocker tab has Mindful Launch Pause Curtain
     composeTestRule.onNodeWithTag("nav_blocker").performClick()
@@ -151,34 +159,42 @@ class ExampleRobolectricTest {
     // Insights tab has Weekly Wellbeing Report Card Print button
     composeTestRule.onNodeWithTag("nav_insights").performClick()
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("insights_print_btn").performScrollTo().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("insights_lazy_list").performScrollToNode(hasTestTag("insights_print_btn"))
+    composeTestRule.onNodeWithTag("insights_print_btn").assertIsDisplayed()
 
     // More -> Mindful Usage Tools -> Evening Wind-Down Checklist
     composeTestRule.onNodeWithTag("nav_more").performClick()
     composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("more_hub_lazy_list").performScrollToNode(hasTestTag("more_tile_mindful"))
     composeTestRule.onNodeWithTag("more_tile_mindful").performClick()
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("wind_down_step_charger_away").performScrollTo().performClick()
+    composeTestRule.onNodeWithTag("mindful_lazy_list").performScrollToNode(hasTestTag("wind_down_step_charger_away"))
+    composeTestRule.onNodeWithTag("wind_down_step_charger_away").performClick()
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("subpage_back_btn").performClick()
 
     // More -> Settings -> Check Releases on GitHub
     composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("more_hub_lazy_list").performScrollToNode(hasTestTag("more_tile_settings"))
     composeTestRule.onNodeWithTag("more_tile_settings").performClick()
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("more_check_updates_btn").performScrollTo().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("settings_lazy_list").performScrollToNode(hasTestTag("more_check_updates_btn"))
+    composeTestRule.onNodeWithTag("more_check_updates_btn").assertIsDisplayed()
   }
 
   @Test
   @Config(qualifiers = "w900dp-h1000dp")
   fun tabletWidth_rendersTwoPaneNavigationRailAndCanonicalLayouts() {
     val app = ApplicationProvider.getApplicationContext<FocusNestApplication>()
+    kotlinx.coroutines.runBlocking { app.container.preferences.clearAll() }
     val vm = FocusNestViewModel(app)
 
     composeTestRule.setContent {
       FocusNestAppRoot(viewModel = vm, useNavRail = true)
     }
-    composeTestRule.waitForIdle()
+    composeTestRule.waitUntil(timeoutMillis = 5_000) {
+      composeTestRule.onAllNodesWithText("Welcome to FocusNest").fetchSemanticsNodes().isNotEmpty()
+    }
     composeTestRule.onNodeWithTag("onboarding_skip_all_btn").performClick()
     composeTestRule.waitUntil(timeoutMillis = 5_000) {
       composeTestRule.onAllNodesWithText("Today's Screen Time").fetchSemanticsNodes().isNotEmpty()

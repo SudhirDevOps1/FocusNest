@@ -523,6 +523,16 @@ class InsightsAndBackupRepository(
         }
         .ifBlank { "<tr><td colspan='2'>No category data recorded.</td></tr>" }
 
+    val sessionRows =
+      sessions
+        .take(10)
+        .joinToString("") { s ->
+          val mins = (s.elapsedSeconds / 60L).toInt()
+          val noteText = s.note.ifBlank { "—" }
+          "<tr><td>${escapeHtml(s.dateKey)}</td><td>${escapeHtml(s.sessionType)}</td><td>${FocusTimeUtils.formatDurationMinutes(mins)}</td><td>${escapeHtml(noteText)}</td></tr>"
+        }
+        .ifBlank { "<tr><td colspan='4'>No focus sessions logged in this range.</td></tr>" }
+
     val reflectionLine =
       when {
         totalFocusMin >= goal.weeklyFocusGoalMinutes ->
@@ -554,9 +564,9 @@ class InsightsAndBackupRepository(
       <div class="header">
         <div>
           <h1>FocusNest Weekly Wellbeing Report Card</h1>
-          <div style="color:#46615A;font-size:13px">Window: $startDateKey to $endDateKey • 100% On-Device Report</div>
+          <div style="color:#46615A;font-size:13px">Window: ${escapeHtml(startDateKey)} to ${escapeHtml(endDateKey)} • 100% On-Device Report</div>
         </div>
-        <span class="badge">$statusBadge</span>
+        <span class="badge">${escapeHtml(statusBadge)}</span>
       </div>
       <div class="grid">
         <div class="kpi"><div class="label">Screen Time</div><div class="val">${FocusTimeUtils.formatDurationMinutes(totalScreenMin)}</div></div>
@@ -564,17 +574,24 @@ class InsightsAndBackupRepository(
         <div class="kpi"><div class="label">Shield Deflections</div><div class="val">$blockedAttempts / $mindfulUnlocks</div></div>
         <div class="kpi"><div class="label">Habit Check-ins</div><div class="val">${habitLogs.size} (${activeHabits.size} active)</div></div>
       </div>
-      <h2>Category Time Distribution</h2>
+      <h2>Category Distribution</h2>
       <table><tr><th>Category</th><th>Time Used</th></tr>$categoryRows</table>
       <h2>Top Applications</h2>
       <table><tr><th>Application</th><th>Measured Usage</th></tr>$appRows</table>
+      <h2>Recent Focus Sessions</h2>
+      <table><tr><th>Date</th><th>Type</th><th>Duration</th><th>Note</th></tr>$sessionRows</table>
       <div class="reflection"><strong>Weekly Reflection Summary:</strong> ${escapeHtml(reflectionLine)}</div>
       </body></html>
     """.trimIndent()
   }
 
   private fun escapeHtml(input: String): String =
-    input.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    input
+      .replace("&", "&amp;")
+      .replace("<", "&lt;")
+      .replace(">", "&gt;")
+      .replace("\"", "&quot;")
+      .replace("'", "&#39;")
 
   suspend fun clearUsageHistory() {
     appUsageDao.deleteAll()

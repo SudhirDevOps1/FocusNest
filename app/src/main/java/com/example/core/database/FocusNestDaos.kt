@@ -178,6 +178,9 @@ interface UnlockDao {
   @Query("SELECT * FROM unlock_history ORDER BY timestampEpochMs DESC")
   suspend fun getAllHistory(): List<UnlockHistoryEntity>
 
+  @Query("SELECT * FROM unlock_history ORDER BY timestampEpochMs DESC LIMIT :limit")
+  suspend fun getRecentHistory(limit: Int = 50): List<UnlockHistoryEntity>
+
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insertHistory(entry: UnlockHistoryEntity): Long
 

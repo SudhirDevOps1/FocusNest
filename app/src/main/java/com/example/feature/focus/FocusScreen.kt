@@ -151,6 +151,7 @@ fun FocusScreen(
   val timeFmt = remember { DateTimeFormatter.ofPattern("HH:mm") }
 
   AdaptiveTwoPane(
+    listTestTag = "focus_lazy_list",
     headerContent = {
       Row(
         modifier = Modifier.fillMaxWidth(),

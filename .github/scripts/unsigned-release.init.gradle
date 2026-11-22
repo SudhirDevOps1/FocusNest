@@ -1,0 +1,12 @@
+// CI-only Gradle init script used when RELEASE_KEYSTORE_BASE64 secret is not configured.
+// Runs in afterEvaluate so it overrides signingConfig without modifying app/build.gradle.kts,
+// allowing CI to assemble an explicitly unsigned release APK (app-release-unsigned.apk).
+allprojects { proj ->
+    proj.afterEvaluate {
+        if (proj.plugins.hasPlugin("com.android.application")) {
+            proj.android.buildTypes.named("release").configure {
+                signingConfig = null
+            }
+        }
+    }
+}

@@ -15,7 +15,10 @@ import com.example.core.database.InstalledAppDao
 import com.example.core.database.InstalledAppEntity
 import com.example.core.permissions.PermissionManager
 import com.example.domain.model.AppCategory
+import com.example.domain.model.AppPackageCategory
 import com.example.domain.model.FocusTimeUtils
+import com.example.domain.model.SystemEnvironmentSnapshot
+import com.example.domain.model.SystemPackageClassifier
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +32,9 @@ class UsageStatsRepository(
   private val dailyAnalyticsDao: DailyAnalyticsDao,
 ) {
   val installedApps: Flow<List<InstalledAppEntity>> = installedAppDao.observeAll()
+
+  fun inspectSystemEnvironment(): SystemEnvironmentSnapshot =
+    SystemPackageClassifier.inspectEnvironment(context)
 
   fun observeUsageForDate(dateKey: String): Flow<List<AppUsageEntity>> =
     appUsageDao.observeUsageForDate(dateKey)
@@ -47,6 +53,7 @@ class UsageStatsRepository(
   suspend fun syncInstalledApps(): List<InstalledAppEntity> =
     withContext(Dispatchers.IO) {
       val pm = context.packageManager
+      val env = SystemPackageClassifier.inspectEnvironment(context)
       val launcherIntent =
         Intent(Intent.ACTION_MAIN).apply { addCategory(Intent.CATEGORY_LAUNCHER) }
       val resolveInfos =
@@ -69,18 +76,21 @@ class UsageStatsRepository(
             val pkg = info.activityInfo?.packageName ?: return@mapNotNull null
             if (pkg == selfPackage) return@mapNotNull null
             val appInfo = info.activityInfo.applicationInfo
-            val label = info.loadLabel(pm)?.toString()?.takeIf { it.isNotBlank() } ?: pkg
+            val label = info.loadLabel(pm).toString().takeIf { it.isNotBlank() } ?: pkg
             val existing = existingMap[pkg]
             val category = inferCategory(pkg, appInfo)
-            val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+            val isSystemFlag = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+            val pkgClass = SystemPackageClassifier.classify(pkg, isSystemFlag, env)
+            val isSystemOrInfra = pkgClass.excludeFromDistractingByDefault
             InstalledAppEntity(
               packageName = pkg,
               appName = label,
               category = category.name,
-              isSystemApp = isSystem,
-              isSelectedDistracting = existing?.isSelectedDistracting ?: false,
+              isSystemApp = isSystemFlag || pkgClass == AppPackageCategory.LAUNCHER_HOME,
+              isSelectedDistracting =
+                if (isSystemOrInfra) false else (existing?.isSelectedDistracting ?: false),
               isEmergencyWhitelisted =
-                existing?.isEmergencyWhitelisted ?: isDefaultSafeApp(pkg),
+                existing?.isEmergencyWhitelisted ?: (isDefaultSafeApp(pkg) || pkgClass == AppPackageCategory.LAUNCHER_HOME),
               lastSeenEpochMs = now,
             )
           }

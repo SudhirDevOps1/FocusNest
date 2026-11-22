@@ -87,6 +87,8 @@ fun InsightsScreen(
   onBuildJson: suspend () -> String,
   onBuildPrintableHtml: suspend (String, String) -> String,
   onShowMessage: (String) -> Unit,
+  showSystemApps: Boolean = false,
+  onToggleShowSystemApps: (Boolean) -> Unit = {},
 ) {
   val context = LocalContext.current
   val scope = rememberCoroutineScope()
@@ -231,7 +233,29 @@ fun InsightsScreen(
 
     AdaptiveTwoPane(
       modifier = Modifier.weight(1f),
+      listTestTag = "insights_lazy_list",
       primaryPane = {
+        item {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Text(
+              text = if (showSystemApps) "Showing all measured packages" else "System & home launchers excluded",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.weight(1f),
+            )
+            FilterChip(
+              selected = showSystemApps,
+              onClick = { onToggleShowSystemApps(!showSystemApps) },
+              label = { Text(if (showSystemApps) "System Apps: Shown" else "Show System Apps") },
+              modifier = Modifier.testTag("insights_show_system_chip"),
+            )
+          }
+        }
+
         if (rangeTab == 3) {
           item {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

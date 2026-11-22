@@ -3,7 +3,7 @@
 FocusNest is designed so that your digital wellbeing data belongs exclusively to you.
 
 1. **Zero Data Collection**: FocusNest does not collect, sell, rent, or transmit personal data, usage statistics, notification text, accessibility events, or browsing queries to any remote server.
-2. **No Internet Permission**: `app/src/main/AndroidManifest.xml` omits `android.permission.INTERNET`, preventing the app from initiating network connections. Checking for app updates delegates an external browser `Intent.ACTION_VIEW` to [GitHub Releases](https://github.com/OWNER/FocusNest/releases/latest) strictly when tapped by you.
+2. **No Internet Permission**: `app/src/main/AndroidManifest.xml` omits `android.permission.INTERNET`, preventing the app from initiating network connections. Checking for app updates delegates an external browser `Intent.ACTION_VIEW` to [GitHub Releases](https://github.com/SudhirDevOps1/FocusNest/releases/latest) strictly when tapped by you.
 3. **Local Storage & Offline Audio Only**: All usage snapshots, focus sessions, block rules, NFC tag UIDs, QR tokens, wind-down checklist completions, and optional notification summaries are stored strictly in private app storage (Room SQLite & DataStore). Ambient soundscapes are synthesized procedurally on-device via `AudioTrack`.
 4. **Optional Sensitive Permissions**:
    - `PACKAGE_USAGE_STATS`: Used solely to compute on-device screen time and app launch counts.

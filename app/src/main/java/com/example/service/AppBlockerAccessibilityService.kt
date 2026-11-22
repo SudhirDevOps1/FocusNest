@@ -5,8 +5,11 @@ import android.content.Intent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.example.FocusNestApplication
+import com.example.domain.blocker.BlockingStateManager
+import com.example.domain.model.AppPackageCategory
 import com.example.domain.model.LaunchPauseCoordinator
 import com.example.domain.model.ReelsTargetApp
+import com.example.domain.model.SystemPackageClassifier
 import com.example.ui.blocker.BlockedOverlayActivity
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
@@ -24,8 +27,6 @@ import kotlinx.coroutines.launch
  */
 class AppBlockerAccessibilityService : AccessibilityService() {
   private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-  private var lastBlockedPackage: String = ""
-  private var lastBlockedAtMs: Long = 0L
   private var lastShortFormAlertMs: Long = 0L
 
   override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -34,14 +35,22 @@ class AppBlockerAccessibilityService : AccessibilityService() {
 
     val app = applicationContext as? FocusNestApplication ?: return
     val now = System.currentTimeMillis()
+    val env = app.container.usageStatsRepository.inspectSystemEnvironment()
+    val pkgCategory = SystemPackageClassifier.classify(pkg, isSystemFlag = false, env = env)
+    if (
+      pkgCategory == AppPackageCategory.LAUNCHER_HOME ||
+        pkgCategory == AppPackageCategory.SYSTEM_UI_INFRASTRUCTURE ||
+        pkgCategory == AppPackageCategory.INPUT_METHOD ||
+        pkgCategory == AppPackageCategory.PERMISSION_CONTROLLER
+    ) {
+      return
+    }
 
     if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
       serviceScope.launch {
         val decision = app.container.blockerRepository.evaluatePackageDecision(pkg, now)
         if (decision.isBlocked) {
-          if (pkg == lastBlockedPackage && now - lastBlockedAtMs < 2500L) return@launch
-          lastBlockedPackage = pkg
-          lastBlockedAtMs = now
+          if (!BlockingStateManager.shouldDispatchOverlay(pkg, now)) return@launch
           app.container.blockerRepository.recordBlockedAttempt(pkg)
           launchBlockedScreen(
             packageName = pkg,
@@ -66,9 +75,7 @@ class AppBlockerAccessibilityService : AccessibilityService() {
             nowEpochMs = now,
           )
         ) {
-          if (pkg == lastBlockedPackage && now - lastBlockedAtMs < 2500L) return@launch
-          lastBlockedPackage = pkg
-          lastBlockedAtMs = now
+          if (!BlockingStateManager.shouldDispatchOverlay(pkg, now)) return@launch
           launchBlockedScreen(
             packageName = pkg,
             reason = "Mindful ${settings.launchPauseSeconds}s breath before entering",

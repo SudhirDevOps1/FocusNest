@@ -13,10 +13,14 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
@@ -30,7 +34,9 @@ import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
@@ -38,6 +44,7 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -47,11 +54,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,7 +70,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.core.design.FocusNestLogoMark
 import com.example.domain.model.FocusTimeUtils
+import com.example.domain.model.StartupPhase
 import com.example.domain.model.TimerMode
 import com.example.feature.blocker.BlockerScreen
 import com.example.feature.focus.FocusScreen
@@ -153,13 +164,16 @@ fun FocusNestAppRoot(
   useNavRail: Boolean,
 ) {
   val settings by viewModel.settings.collectAsStateWithLifecycle()
+  val startupPhase by viewModel.startupPhase.collectAsStateWithLifecycle()
+  val tutorialReplayRequested by viewModel.tutorialReplayRequested.collectAsStateWithLifecycle()
   val timerState by viewModel.timerState.collectAsStateWithLifecycle()
   val permissions by viewModel.permissions.collectAsStateWithLifecycle()
-  val installedApps by viewModel.installedApps.collectAsStateWithLifecycle()
-  val todayUsage by viewModel.todayUsage.collectAsStateWithLifecycle()
-  val yesterdayUsage by viewModel.yesterdayUsage.collectAsStateWithLifecycle()
-  val weeklyUsage by viewModel.weeklyUsage.collectAsStateWithLifecycle()
-  val monthlyUsage by viewModel.monthlyUsage.collectAsStateWithLifecycle()
+  val vpnDiagnostics by viewModel.vpnDiagnostics.collectAsStateWithLifecycle()
+  val installedApps by viewModel.displayInstalledApps.collectAsStateWithLifecycle()
+  val todayUsage by viewModel.displayTodayUsage.collectAsStateWithLifecycle()
+  val yesterdayUsage by viewModel.displayYesterdayUsage.collectAsStateWithLifecycle()
+  val weeklyUsage by viewModel.displayWeeklyUsage.collectAsStateWithLifecycle()
+  val monthlyUsage by viewModel.displayMonthlyUsage.collectAsStateWithLifecycle()
   val appLimits by viewModel.appLimits.collectAsStateWithLifecycle()
   val categoryLimits by viewModel.categoryLimits.collectAsStateWithLifecycle()
   val appGroups by viewModel.appGroups.collectAsStateWithLifecycle()
@@ -182,7 +196,7 @@ fun FocusNestAppRoot(
   val baseContext = LocalContext.current
   val localizedContext =
     remember(baseContext, settings.languageCode) {
-      val targetLocale = Locale(settings.languageCode.ifBlank { "en" })
+      val targetLocale = Locale.forLanguageTag(settings.languageCode.ifBlank { "en" })
       val cfg = Configuration(baseContext.resources.configuration).apply { setLocale(targetLocale) }
       val localizedResources = baseContext.createConfigurationContext(cfg).resources
       object : ContextWrapper(baseContext) {
@@ -205,15 +219,44 @@ fun FocusNestAppRoot(
     accentPalette = settings.accentPalette,
     dynamicColor = settings.dynamicColorEnabled,
   ) {
-    if (!settings.onboardingCompleted) {
+    if (startupPhase == StartupPhase.INITIALIZING && !tutorialReplayRequested) {
+      Surface(modifier = Modifier.fillMaxSize().testTag("startup_initializing_surface")) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            FocusNestLogoMark(size = 56.dp)
+            Spacer(modifier = Modifier.height(14.dp))
+            Text("FocusNest", style = MaterialTheme.typography.headlineMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            CircularProgressIndicator()
+          }
+        }
+      }
+      return@FocusNestTheme
+    }
+
+    if (
+      (startupPhase == StartupPhase.FIRST_RUN || startupPhase == StartupPhase.ONBOARDING) &&
+        !tutorialReplayRequested
+    ) {
+      val preselected =
+        remember(installedApps) {
+          installedApps.filter { it.isSelectedDistracting }.map { it.packageName }.toSet()
+        }
       OnboardingScreen(
         permissions = permissions,
         installedApps = installedApps,
         onRefreshPermissions = viewModel::refreshPermissionsAndSync,
         onComplete = viewModel::completeOnboarding,
+        isTutorialReplay = false,
+        initialScreenGoalMin = focusGoal.dailyScreenTimeGoalMinutes,
+        initialFocusGoalMin = focusGoal.dailyFocusGoalMinutes,
+        initialSelectedApps = preselected,
+        onBackFromTutorial = null,
       )
       return@FocusNestTheme
     }
+
+    Box(modifier = Modifier.fillMaxSize()) {
 
     val navController = rememberNavController()
     val tabs = listOf(MainTab.Home, MainTab.Focus, MainTab.Blocker, MainTab.Insights, MainTab.More)
@@ -365,6 +408,9 @@ fun FocusNestAppRoot(
                 onToggleBlockedNetworkPackage = viewModel::toggleBlockedNetworkPackage,
                 onUpdateLaunchPauseConfig = viewModel::updateLaunchPauseConfig,
                 onToggleLaunchPausePackage = viewModel::toggleLaunchPausePackage,
+                vpnDiagnostics = vpnDiagnostics,
+                onVerifyWebsiteDomain = viewModel::verifyWebsiteDomain,
+                onToggleShowSystemApps = viewModel::setShowSystemAppsInStats,
               )
             }
             composable(MainTab.Insights.route) {
@@ -383,6 +429,8 @@ fun FocusNestAppRoot(
                 onBuildJson = viewModel::buildJsonExport,
                 onBuildPrintableHtml = viewModel::buildPrintableHtml,
                 onShowMessage = viewModel::postMessage,
+                showSystemApps = settings.showSystemAppsInStats,
+                onToggleShowSystemApps = viewModel::setShowSystemAppsInStats,
               )
             }
             composable(MainTab.More.route) {
@@ -418,6 +466,8 @@ fun FocusNestAppRoot(
                 onClearHabits = viewModel::clearHabits,
                 onToggleWindDownStep = viewModel::toggleWindDownStep,
                 onOpenReleases = viewModel::openReleasesInBrowser,
+                onToggleShowSystemApps = viewModel::setShowSystemAppsInStats,
+                onReplayTutorial = viewModel::startOnboardingTutorialReplay,
               )
             }
             composable("habits") {
@@ -437,6 +487,26 @@ fun FocusNestAppRoot(
           }
         }
       }
+      if (tutorialReplayRequested) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+          val preselected =
+            remember(installedApps) {
+              installedApps.filter { it.isSelectedDistracting }.map { it.packageName }.toSet()
+            }
+          OnboardingScreen(
+            permissions = permissions,
+            installedApps = installedApps,
+            onRefreshPermissions = viewModel::refreshPermissionsAndSync,
+            onComplete = viewModel::completeOnboarding,
+            isTutorialReplay = true,
+            initialScreenGoalMin = focusGoal.dailyScreenTimeGoalMinutes,
+            initialFocusGoalMin = focusGoal.dailyFocusGoalMinutes,
+            initialSelectedApps = preselected,
+            onBackFromTutorial = viewModel::dismissOnboardingTutorialReplay,
+          )
+        }
+      }
+    }
     }
   }
   }

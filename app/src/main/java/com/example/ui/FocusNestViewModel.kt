@@ -28,18 +28,25 @@ import com.example.core.database.ShortFormRuleEntity
 import com.example.core.database.UnlockHistoryEntity
 import com.example.core.database.UnlockRuleEntity
 import com.example.core.database.WebsiteRuleEntity
+import com.example.core.datastore.FocusNestPreferences
 import com.example.core.datastore.FocusNestSettings
 import com.example.core.datastore.PersistedTimerState
 import com.example.core.permissions.PermissionManager
+import com.example.domain.blocker.RuleEvaluator
 import com.example.domain.model.AccentPalette
 import com.example.domain.model.AmbientSoundType
 import com.example.domain.model.FocusTimeUtils
 import com.example.domain.model.PermissionSnapshot
 import com.example.domain.model.SessionType
+import com.example.domain.model.StartupPhase
+import com.example.domain.model.SystemEnvironmentSnapshot
+import com.example.domain.model.SystemPackageClassifier
 import com.example.domain.model.ThemeMode
 import com.example.domain.model.TimerMode
 import com.example.domain.model.UnlockChallengeType
 import com.example.domain.model.UpdateReleaseConfig
+import com.example.domain.model.VpnDiagnostics
+import com.example.domain.model.WebsiteRuleEvaluation
 import com.example.service.FocusNestVpnService
 import com.example.service.FocusTimerService
 import com.example.widget.WidgetUpdater
@@ -47,7 +54,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -63,11 +71,33 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
   private val insightsRepo = container.insightsRepository
 
   val settings: StateFlow<FocusNestSettings> =
-    prefs.settingsFlow.stateIn(
-      viewModelScope,
-      SharingStarted.WhileSubscribed(5000),
-      FocusNestSettings(),
-    )
+    prefs.settingsFlow
+      .catch { emit(FocusNestSettings()) }
+      .stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        FocusNestSettings(),
+      )
+
+  val startupPhase: StateFlow<StartupPhase> =
+    prefs.settingsResultFlow
+      .catch { emit(Result.failure(it)) }
+      .map { res ->
+        res.fold(
+          onSuccess = { loaded ->
+            FocusNestPreferences.resolveStartupPhase(isLoaded = true, settings = loaded, readError = false)
+          },
+          onFailure = { StartupPhase.RECOVERY },
+        )
+      }
+      .stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        StartupPhase.INITIALIZING,
+      )
+
+  private val _tutorialReplayRequested = MutableStateFlow(false)
+  val tutorialReplayRequested: StateFlow<Boolean> = _tutorialReplayRequested.asStateFlow()
 
   val timerState: StateFlow<PersistedTimerState> =
     prefs.timerStateFlow.stateIn(
@@ -78,6 +108,9 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
 
   private val _permissions = MutableStateFlow(PermissionManager.getSnapshot(app))
   val permissions: StateFlow<PermissionSnapshot> = _permissions.asStateFlow()
+
+  private val _systemEnvironment = MutableStateFlow(usageRepo.inspectSystemEnvironment())
+  val systemEnvironment: StateFlow<SystemEnvironmentSnapshot> = _systemEnvironment.asStateFlow()
 
   private val _statusBanner = MutableStateFlow<String?>(null)
   val statusBanner: StateFlow<String?> = _statusBanner.asStateFlow()
@@ -172,6 +205,71 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
   private val _lastScannedNfcUid = MutableStateFlow<String?>(null)
   val lastScannedNfcUid: StateFlow<String?> = _lastScannedNfcUid.asStateFlow()
 
+  val vpnDiagnostics: StateFlow<VpnDiagnostics> =
+    combine(
+      FocusNestVpnService.diagnosticsFlow,
+      websiteRules,
+      settings,
+    ) { diag, rules, curSettings ->
+      val enabled = rules.filter { it.isEnabled }
+      diag.copy(
+        activeRuleCount = enabled.size,
+        blocklistCount = enabled.count { !it.isAllowlist },
+        allowlistCount = enabled.count { it.isAllowlist },
+        isPerAppScoped = curSettings.blockedNetworkPackages.isNotEmpty(),
+        scopedPackageCount = curSettings.blockedNetworkPackages.size,
+      )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), VpnDiagnostics())
+
+  val displayInstalledApps: StateFlow<List<InstalledAppEntity>> =
+    combine(installedApps, settings, _systemEnvironment) { apps, curSettings, env ->
+      SystemPackageClassifier.filterAppsForBlockerSelection(
+        apps = apps,
+        includeSystemApps = curSettings.showSystemAppsInStats,
+        env = env,
+      )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val displayTodayUsage: StateFlow<List<AppUsageEntity>> =
+    combine(todayUsage, installedApps, settings, _systemEnvironment) { usage, apps, curSettings, env ->
+      SystemPackageClassifier.filterUsageForDisplay(
+        usage = usage,
+        installedMap = apps.associateBy { it.packageName },
+        includeSystemApps = curSettings.showSystemAppsInStats,
+        env = env,
+      )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val displayYesterdayUsage: StateFlow<List<AppUsageEntity>> =
+    combine(yesterdayUsage, installedApps, settings, _systemEnvironment) { usage, apps, curSettings, env ->
+      SystemPackageClassifier.filterUsageForDisplay(
+        usage = usage,
+        installedMap = apps.associateBy { it.packageName },
+        includeSystemApps = curSettings.showSystemAppsInStats,
+        env = env,
+      )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val displayWeeklyUsage: StateFlow<List<AppUsageEntity>> =
+    combine(weeklyUsage, installedApps, settings, _systemEnvironment) { usage, apps, curSettings, env ->
+      SystemPackageClassifier.filterUsageForDisplay(
+        usage = usage,
+        installedMap = apps.associateBy { it.packageName },
+        includeSystemApps = curSettings.showSystemAppsInStats,
+        env = env,
+      )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+  val displayMonthlyUsage: StateFlow<List<AppUsageEntity>> =
+    combine(monthlyUsage, installedApps, settings, _systemEnvironment) { usage, apps, curSettings, env ->
+      SystemPackageClassifier.filterUsageForDisplay(
+        usage = usage,
+        installedMap = apps.associateBy { it.packageName },
+        includeSystemApps = curSettings.showSystemAppsInStats,
+        env = env,
+      )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
   init {
     refreshPermissionsAndSync()
   }
@@ -184,8 +282,32 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
     _statusBanner.value = msg
   }
 
+  fun startOnboardingTutorialReplay() {
+    _tutorialReplayRequested.value = true
+  }
+
+  fun dismissOnboardingTutorialReplay() {
+    _tutorialReplayRequested.value = false
+  }
+
+  fun setShowSystemAppsInStats(show: Boolean) {
+    viewModelScope.launch {
+      prefs.setShowSystemApps(show)
+    }
+  }
+
+  fun verifyWebsiteDomain(domain: String): WebsiteRuleEvaluation =
+    RuleEvaluator.evaluateDomain(domain, websiteRules.value)
+
   fun refreshPermissionsAndSync() {
-    _permissions.value = PermissionManager.getSnapshot(app)
+    val previous = _permissions.value
+    val updated = PermissionManager.getSnapshot(app, previous = previous)
+    _permissions.value = updated
+    _systemEnvironment.value = usageRepo.inspectSystemEnvironment()
+    if (updated.revokedPermissions.isNotEmpty()) {
+      _statusBanner.value =
+        "Revoked permission detected: ${updated.revokedPermissions.joinToString(", ")}"
+    }
     viewModelScope.launch {
       usageRepo.syncInstalledApps()
       usageRepo.syncTodayUsageFromSystem()
@@ -196,7 +318,8 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
   fun refreshUsageOnly() {
     viewModelScope.launch {
       val ok = usageRepo.syncTodayUsageFromSystem()
-      _permissions.value = PermissionManager.getSnapshot(app)
+      _permissions.value = PermissionManager.getSnapshot(app, previous = _permissions.value)
+      _systemEnvironment.value = usageRepo.inspectSystemEnvironment()
       _statusBanner.value =
         if (ok) "Usage stats synced from Android system."
         else "Usage Access not granted yet. Enable it in Settings to measure screen time."
@@ -219,10 +342,11 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
         weeklyFocusMinutes = dailyFocusGoalMinutes * 7,
       )
       distractingPackages.forEach { pkg -> usageRepo.setAppDistracting(pkg, true) }
-      if (firstProfileName.isNotBlank()) {
+      val trimmedName = firstProfileName.trim()
+      if (trimmedName.isNotBlank() && profiles.value.none { it.name.equals(trimmedName, ignoreCase = true) }) {
         blockerRepo.saveProfile(
           BlockProfileEntity(
-            name = firstProfileName.trim(),
+            name = trimmedName,
             presetType = "Custom",
             blockedPackages = distractingPackages.toList(),
             focusDurationMinutes = firstFocusMinutes,
@@ -232,7 +356,8 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
           )
         )
       }
-      prefs.updateSettings { it.copy(onboardingCompleted = true) }
+      prefs.markOnboardingCompleted()
+      _tutorialReplayRequested.value = false
     }
   }
 
@@ -543,7 +668,7 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
   // Website Blocking (Local VPN)
   fun addWebsiteRule(domain: String, category: String, isAllowlist: Boolean) {
     viewModelScope.launch {
-      val clean = domain.trim().lowercase().removePrefix("https://").removePrefix("http://").substringBefore("/")
+      val clean = RuleEvaluator.normalizeDomainInput(domain)
       if (clean.isBlank() || !clean.contains('.')) {
         _statusBanner.value = "Enter a valid domain such as youtube.com"
         return@launch
@@ -551,28 +676,33 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
       blockerRepo.saveWebsiteRule(
         WebsiteRuleEntity(domain = clean, category = category, isAllowlist = isAllowlist, isEnabled = true)
       )
+      FocusNestVpnService.syncRules(app)
     }
   }
 
   fun deleteWebsiteRule(rule: WebsiteRuleEntity) {
-    viewModelScope.launch { blockerRepo.deleteWebsiteRule(rule) }
+    viewModelScope.launch {
+      blockerRepo.deleteWebsiteRule(rule)
+      FocusNestVpnService.syncRules(app)
+    }
   }
 
   fun installWebsitePack(packName: String) {
     viewModelScope.launch {
       blockerRepo.installOfflineWebsitePack(packName)
+      FocusNestVpnService.syncRules(app)
       _statusBanner.value = "Installed offline pack: $packName"
     }
   }
 
   fun stopLocalVpn() {
     FocusNestVpnService.stop(app)
-    _permissions.value = PermissionManager.getSnapshot(app)
+    _permissions.value = PermissionManager.getSnapshot(app, previous = _permissions.value)
   }
 
   fun startLocalVpn() {
     FocusNestVpnService.start(app)
-    _permissions.value = PermissionManager.getSnapshot(app)
+    _permissions.value = PermissionManager.getSnapshot(app, previous = _permissions.value)
   }
 
   fun toggleBlockedNetworkPackage(pkg: String, blocked: Boolean) {
@@ -583,6 +713,7 @@ class FocusNestViewModel(application: Application) : AndroidViewModel(applicatio
           else cur.blockedNetworkPackages - pkg
         cur.copy(blockedNetworkPackages = next)
       }
+      FocusNestVpnService.syncRules(app)
     }
   }
 

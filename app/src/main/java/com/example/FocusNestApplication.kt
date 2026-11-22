@@ -48,6 +48,7 @@ class AppContainer(context: Context) {
       installedAppDao = database.installedAppDao(),
       preferences = preferences,
       categoryLimitDao = database.categoryLimitDao(),
+      systemEnvironmentProvider = { usageStatsRepository.inspectSystemEnvironment() },
     )
 
   val focusRepository: FocusRepository =
@@ -93,8 +94,10 @@ class FocusNestApplication : Application() {
     container = AppContainer(this)
     createNotificationChannels()
     appScope.launch {
-      container.focusRepository.ensureDefaultGoal()
-      container.blockerRepository.ensureStarterConfigurations()
+      runCatching {
+        container.focusRepository.ensureDefaultGoal()
+        container.blockerRepository.ensureStarterConfigurations()
+      }
     }
     scheduleBackgroundMonitor()
   }
