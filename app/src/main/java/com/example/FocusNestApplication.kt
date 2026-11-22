@@ -94,8 +94,10 @@ class FocusNestApplication : Application() {
     container = AppContainer(this)
     createNotificationChannels()
     appScope.launch {
-      container.focusRepository.ensureDefaultGoal()
-      container.blockerRepository.ensureStarterConfigurations()
+      runCatching {
+        container.focusRepository.ensureDefaultGoal()
+        container.blockerRepository.ensureStarterConfigurations()
+      }
     }
     scheduleBackgroundMonitor()
   }
