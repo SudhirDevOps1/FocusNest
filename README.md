@@ -8,15 +8,21 @@
   **An offline-first, zero-telemetry Android focus sanctuary, mindful app blocker, and wellbeing tracker.**
 
   <p align="center">
-    <a href="https://github.com/SudhirDevOps1/FocusNest/actions/workflows/android-ci.yml"><img src="https://github.com/SudhirDevOps1/FocusNest/actions/workflows/android-ci.yml/badge.svg" alt="FocusNest Android CI"></a>
-    <a href="https://github.com/SudhirDevOps1/FocusNest/actions/workflows/deploy-pages.yml"><img src="https://github.com/SudhirDevOps1/FocusNest/actions/workflows/deploy-pages.yml/badge.svg" alt="Showcase Website Deploy"></a>
-    <a href="https://github.com/SudhirDevOps1/FocusNest/releases"><img src="https://img.shields.io/github/v/release/SudhirDevOps1/FocusNest?color=38B593&label=Release" alt="Latest Release"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-38B593.svg" alt="MIT License"></a>
-    <img src="https://img.shields.io/badge/Privacy-0%20INTERNET%20Permission-0E2D27.svg" alt="Zero Internet Permission">
-    <img src="https://img.shields.io/badge/Target%20SDK-36%20(Android%2016)-155E50.svg" alt="Target SDK 36">
-    <img src="https://img.shields.io/badge/Min%20SDK-26%20(Android%208.0)-155E50.svg" alt="Min SDK 26">
-    <img src="https://img.shields.io/badge/Kotlin-2.4-blue.svg" alt="Kotlin 2.4">
-    <img src="https://img.shields.io/badge/UI-Jetpack%20Compose%20M3-4285F4.svg" alt="Compose Material 3">
+    <a href="https://github.com/SudhirDevOps1/FocusNest/releases"><img src="https://img.shields.io/github/downloads/SudhirDevOps1/FocusNest/total?style=for-the-badge&logo=github&color=38B593&label=Downloads" alt="Total Downloads"></a>
+    <img src="https://komarev.com/ghpvc/?username=SudhirDevOps1-FocusNest&label=Repo+Views&color=5B8DEF&style=for-the-badge" alt="Repository Visitors">
+    <a href="https://github.com/SudhirDevOps1/FocusNest/stargazers"><img src="https://img.shields.io/github/stars/SudhirDevOps1/FocusNest?style=for-the-badge&logo=github&color=E5A158" alt="GitHub Stars"></a>
+    <a href="https://github.com/SudhirDevOps1/FocusNest/network/members"><img src="https://img.shields.io/github/forks/SudhirDevOps1/FocusNest?style=for-the-badge&logo=github&color=8E4EC6" alt="GitHub Forks"></a>
+    <a href="https://github.com/SudhirDevOps1/FocusNest/watchers"><img src="https://img.shields.io/github/watchers/SudhirDevOps1/FocusNest?style=for-the-badge&logo=github&color=38B593" alt="GitHub Watchers"></a>
+  </p>
+
+  <p align="center">
+    <a href="https://github.com/SudhirDevOps1/FocusNest/actions/workflows/android-ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/SudhirDevOps1/FocusNest/android-ci.yml?branch=main&style=for-the-badge&label=Build%20%26%20CI&logo=githubactions&logoColor=white" alt="FocusNest Android CI"></a>
+    <a href="https://github.com/SudhirDevOps1/FocusNest/actions/workflows/deploy-pages.yml"><img src="https://img.shields.io/github/actions/workflow/status/SudhirDevOps1/FocusNest/deploy-pages.yml?branch=main&style=for-the-badge&label=Showcase&logo=githubpages&logoColor=white" alt="Showcase Website Deploy"></a>
+    <a href="https://github.com/SudhirDevOps1/FocusNest/releases"><img src="https://img.shields.io/github/v/release/SudhirDevOps1/FocusNest?color=38B593&label=Release&style=for-the-badge" alt="Latest Release"></a>
+    <img src="https://img.shields.io/badge/Android%2011%2B-Verified%20%E2%9C%93-38B593?style=for-the-badge&logo=android&logoColor=white" alt="Android 11 Compatible">
+    <img src="https://img.shields.io/badge/Target%20SDK-36-155E50?style=for-the-badge&logo=android&logoColor=white" alt="Target SDK 36">
+    <img src="https://img.shields.io/badge/Privacy-0%20INTERNET-0E2D27?style=for-the-badge&logo=shield" alt="Zero Internet Permission">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-38B593?style=for-the-badge" alt="MIT License"></a>
   </p>
 
   <p align="center">
